@@ -143,6 +143,13 @@ def open_socket():
             elif os.path.exists('vix.txt'):
                 with open('vix.txt', 'w') as textFile:
                    textFile.write(str(vix))
+
+            if not os.path.exists('NiftyLTP.txt'):
+                     with open('NiftyLTP.txt', 'w') as textFile:
+                          textFile.write(str(niftyLTP))
+            elif os.path.exists('NiftyLTP.txt'):
+                      with open('NiftyLTP.txt', 'w') as textFile:
+                         textFile.write(str(niftyLTP))       
                    
             ## Added for ATM from OC##
        
@@ -310,7 +317,7 @@ def placeStopOrders():
     global sas
     global orders
     
-    placeStraddleStopOders(sas,orders,stoploss)
+    placeStraddleStopOders(sas,orders,stoploss,stratergy='MorningNiftyStraddle',SLCorrection=True)
     tradeActive = True
     watchStraddleStopOrdersReentry(sas,orders,tradeActive,'MorningNiftyStraddle',reentry=True)
 

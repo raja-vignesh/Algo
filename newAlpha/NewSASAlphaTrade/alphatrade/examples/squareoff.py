@@ -95,9 +95,9 @@ def calculateMTM():
     if openPositions > 0:
         sendNotifications(f'Warning! {openPositions} still open')
     
-    if os.path.exists("BNLTP.txt"):
-        os.remove("BNLTP.txt")
-        sendNotifications('920 file deleted')
+    if os.path.exists("NiftyLTP.txt"):
+        os.remove("NiftyLTP.txt")
+        sendNotifications('Nifty file deleted')
     else:
         sendNotifications("The 920 does not exist")
     if os.path.exists("backup.txt"):
