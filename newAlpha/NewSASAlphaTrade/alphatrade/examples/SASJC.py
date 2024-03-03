@@ -48,9 +48,9 @@ def generateJCToken():
         print('1')
         userID.send_keys(keyring.get_password("ch***a","username"))
         password.send_keys(keyring.get_password("ch***a","password"))
-        sleep(3)
+        sleep(10)
         try:
-            browser.find_element(By.XPATH,'//*[@id="root"]/div/div[2]/main/div[1]/form/button').click()
+            browser.find_element(By.XPATH,'//*[@id="root"]/div/div[2]/main/div[1]/form/div[3]/button').click()
 
         except NoSuchElementException:
             sendNotifications('No such element login.. Trying')
@@ -62,7 +62,7 @@ def generateJCToken():
         
         ## Get Two FA Token
         
-        sleep(1)
+        sleep(3)
         
         
         
