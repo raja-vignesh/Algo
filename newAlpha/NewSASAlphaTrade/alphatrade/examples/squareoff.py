@@ -9,9 +9,7 @@ from time import sleep
 from datetime import time
 import datetime
 from Orders import placeMarketOrders,getDaywisePositions,getPendingOrders,cancelOrder
-#from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
-from alice_blue import TransactionType,OrderType,ProductType
-
+from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
 from SendNotifications import sendNotifications
 from SAS import createSession
 import re

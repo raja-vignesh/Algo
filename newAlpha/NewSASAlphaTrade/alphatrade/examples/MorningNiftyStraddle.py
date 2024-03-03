@@ -17,7 +17,7 @@ import telegram_send
 from SendNotifications import sendNotifications
 from SAS import createSession
 from strikes import getNiftyMonth,getNiftyWeeklyCall,getNiftyWeeklyPut,getNiftyATMStrikes,getNifty927Stoploss,getOptionInstrumentandPrices
-from Trade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrders,unsubscribeToPrices
+from Trade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrdersReentry,unsubscribeToPrices
 from Common import isExpiryDay,getNiftyFutureScrip,getNiftySpotScrip,getIndiaVixScrip
 import os,sys
 import numpy as np
@@ -312,7 +312,7 @@ def placeStopOrders():
     
     placeStraddleStopOders(sas,orders,stoploss)
     tradeActive = True
-    watchStraddleStopOrders(sas,orders,tradeActive,'MorningNiftyStraddle')
+    watchStraddleStopOrdersReentry(sas,orders,tradeActive,'MorningNiftyStraddle',reentry=True)
 
 
 ##############################################################

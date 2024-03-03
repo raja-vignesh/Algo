@@ -23,7 +23,9 @@ preClosingSLModified = False
 ExpiryCallSL = 0.0
 ExpiryPutSL = 0.0
 instruments = []
-
+callSL = 0.0
+putSL= 0.0
+modifiedSL= 0.0
 def placeStraddleOrders(sas,orders):
 
     for order in orders:
@@ -70,7 +72,9 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,fullPremium=False,
     
     global ExpiryCallSL
     global ExpiryPutSL
-    
+    global callSL
+    global putSL
+    global modifiedSL
     combinedPrice = 0.0
     callCombinedPrice = 0.0
     putCombinedPrice = 0.0
@@ -495,7 +499,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
     
     modifiedstatus = False
     global preClosingSLModified
-    sendNotifications(f'Watching stoporders {stratergy}')
+    sendNotifications(f'Watching stoporders {stratergy} with reentry')
     while tradeActive:
         sleep(14)
         filteredOrders = list(filter(lambda order:order.positionClosed == False,orders))
@@ -514,19 +518,19 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                 preparedOrders = []
                 preparedOrders.append(order)
                 order.positionClosed = False
-                if (stratergy == 'JMExpiryTrades'):
-                    sendNotifications(f'{order.strike} {order.strikeType}  nifty expiry reentered ') 
+                if (stratergy == 'MorningNiftyStraddle'):
+                    sendNotifications(f'{order.strike} {order.strikeType}  nifty  reentered ') 
                     if order.strikeType == StrikeType.CALL:
-                        placeStraddleStopOders(sas,preparedOrders,ExpiryCallSL,'Expiry Nifty call reordered SL added')
+                        placeStraddleStopOders(sas,preparedOrders,modifiedSL,' Nifty call reordered SL added')
                     elif order.strikeType == StrikeType.PUT:
-                        placeStraddleStopOders(sas,preparedOrders,ExpiryPutSL,'Expiry Nifty reordered SL added')
+                        placeStraddleStopOders(sas,preparedOrders,modifiedSL,' Nifty reordered SL added')
                 else:
                     placeStraddleStopOders(sas,preparedOrders,0.25,'930BNStraddle reordered SL added')
                     sendNotifications(f'{order.strike} {order.strikeType} 930 BNStraddle  reentered and placing 0.25 stop') 
 
         
         #To Modify SL at 2:30 PM to cost
-        if datetime.datetime.now().time() >= time(14,10) and preClosingSLModified == False:
+        if datetime.datetime.now().time() >= time(14,30) and preClosingSLModified == False:
             sendNotifications(f'going to modify SLs {stratergy}')
             preClosingSLModified = True
             modifySLtoCost(sas,filteredOrders,stratergy)
