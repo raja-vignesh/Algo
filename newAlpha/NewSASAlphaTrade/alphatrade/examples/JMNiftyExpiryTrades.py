@@ -280,12 +280,12 @@ def getPricesAndPlaceorders():
                 sendNotifications(f"instrumentIndex {atmIndex}")
                 sendNotifications(f"instrumentIndex {atmIndex}")
 
-                # callATMOrder.instrumentToken = instruments[instrumentIndex]
-                # putATMOrder.instrumentToken = putATMOrder.instrument['instrumentToken']
-                # callMinusATMOrder.instrumentToken = callMinusATMOrder.instrument['instrumentToken']
-                # putMinusATMOrder.instrumentToken = putMinusATMOrder.instrument['instrumentToken']
-                # callPlusATMOrder.instrumentToken = callPlusATMOrder.instrument['instrumentToken']
-                # putPlusATMOrder.instrumentToken = putPlusATMOrder.instrument['instrumentToken']
+                callATMOrder.instrumentToken = callATMOrder.instrument['instrumentToken']
+                putATMOrder.instrumentToken = putATMOrder.instrument['instrumentToken']
+                callMinusATMOrder.instrumentToken = callMinusATMOrder.instrument['instrumentToken']
+                putMinusATMOrder.instrumentToken = putMinusATMOrder.instrument['instrumentToken']
+                callPlusATMOrder.instrumentToken = callPlusATMOrder.instrument['instrumentToken']
+                putPlusATMOrder.instrumentToken = putPlusATMOrder.instrument['instrumentToken']
                 callMinusATMOrder.isATMStrike = False
                 putMinusATMOrder.isATMStrike = False
                 callPlusATMOrder.isATMStrike = False

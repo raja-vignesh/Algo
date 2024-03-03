@@ -13,7 +13,7 @@ from Orders import SellOrder,StrikeType,IndexType
 from SendNotifications import sendNotifications
 from SAS import createSession
 from strikes import getNiftyMonth,getNiftyWeeklyCall,getNiftyWeeklyPut,getOptionInstrumentandPrices
-from AVTrade import placeStraddleOrders,placeStraddleStopOders,unsubscribeToPrices,watchStraddleStopOrders
+from Trade import placeStraddleOrders,placeStraddleStopOders,unsubscribeToPrices,watchStraddleStopOrders
 from Common import isExpiryDay,isExpiryTrades,getNiftyFutureScrip,getNiftySpotScrip
 import os,sys
 import math
@@ -57,7 +57,7 @@ def main():
     logging.debug('main')
     global sas
     while sas is None:
-        sas = createSession('r**a')
+        sas = createSession()
         if sas == None:
             sleep(30)
             pass

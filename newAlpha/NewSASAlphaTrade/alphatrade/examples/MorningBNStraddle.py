@@ -10,8 +10,8 @@ from datetime import date,time
 import datetime
 import logging
 from Orders import placeMarketOrders,placeStopLossMarketorder,getOrderHistory,getTradedPriceOfOrder,modifyOrder,placeStopLossLimitOrder,getDaywisePositions,SellOrder,StrikeType,IndexType
-#from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
-from alice_blue import LiveFeedType,TransactionType,OrderType,ProductType
+from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
+#from alice_blue import LiveFeedType,TransactionType,OrderType,ProductType
 from SendNotifications import sendNotifications
 from SAS import createSession
 from strikes import getBankNiftyMonth,getBNWeeklyCall,getBNWeeklyPut,getBankNiftyStrikes,getBN920Stoploss,getOptionInstrumentandPrices
@@ -92,9 +92,9 @@ def open_socket():
     vixInstrument = getIndiaVixScrip()
 
    
-    while datetime.datetime.now().time() <= time(9,19,53):
-        sleep(10)
-        pass
+    #while datetime.datetime.now().time() <= time(9,19,53):
+    #    sleep(10)
+    #    pass
 
     sas.run_socket()
     socket_opened = True

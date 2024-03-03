@@ -406,15 +406,12 @@ def watchStraddleStopOrders(sas,orders,tradeActive,stratergy=None,SLModification
 
         try:
             for order in filteredOrders:
-                
                 for resp in list(response.values()):
-        
                     if resp['instrument_token'] == order.instrumentToken:
                         order.ltp = resp['last_traded_price'] * .01
                 
-                # if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
-                #     checkForMinimumValueAndClose(sas,order,orders)
-                sendNotifications(f'order.ltp {order.ltp}')
+                if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
+                    checkForMinimumValueAndClose(sas,order,orders)
                 if (order.ltp > order.stoplossPrice and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
                     if (order.ltp > order.stoplossPrice and not order.positionClosed):

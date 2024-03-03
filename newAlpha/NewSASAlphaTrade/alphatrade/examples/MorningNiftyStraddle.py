@@ -10,14 +10,14 @@ from datetime import date,time,timedelta
 import datetime
 import logging
 from Orders import placeMarketOrders,placeStopLossMarketorder,getOrderHistory,getTradedPriceOfOrder,modifyOrder,placeStopLossLimitOrder,getDaywisePositions,SellOrder,StrikeType,IndexType
-#from alphatrade import AlphaTrade, LiveFeedType,TransactionType,OrderType,ProductType
-from alice_blue import  LiveFeedType,TransactionType,OrderType,ProductType
+from alphatrade import AlphaTrade, LiveFeedType,TransactionType,OrderType,ProductType
+#from alice_blue import  LiveFeedType,TransactionType,OrderType,ProductType
 
 import telegram_send
 from SendNotifications import sendNotifications
 from SAS import createSession
 from strikes import getNiftyMonth,getNiftyWeeklyCall,getNiftyWeeklyPut,getNiftyATMStrikes,getNifty927Stoploss,getOptionInstrumentandPrices
-from AVTrade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrders,unsubscribeToPrices
+from Trade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrders,unsubscribeToPrices
 from Common import isExpiryDay,getNiftyFutureScrip,getNiftySpotScrip,getIndiaVixScrip
 import os,sys
 import numpy as np
@@ -63,7 +63,7 @@ lotSize = 50
 def main():
     global sas
     while sas is None:
-        sas = createSession('r**a')
+        sas = createSession()
         if sas == None:
             sleep(90)
             pass
@@ -94,7 +94,7 @@ def open_socket():
     Nifty_scrip = getNiftySpotScrip()
     vixInstrument = getIndiaVixScrip()
     
-    while datetime.datetime.now().time() <= time(9,27):
+    while datetime.datetime.now().time() <= time(9,23):
         sleep(30)
         pass
     
