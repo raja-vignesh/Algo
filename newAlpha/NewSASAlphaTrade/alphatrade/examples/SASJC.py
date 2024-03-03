@@ -28,8 +28,8 @@ def generateJCToken():
     try:
         print('started')
         options = webdriver.ChromeOptions()
-        #options.add_argument('--headless')
-        #options.add_argument('--disable-gpu') 
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu') 
         print('1')
         #browser = webdriver.Chrome('C:\chromedriver.exe',options=options)
         #browser = webdriver.Chrome(service=webdriver.chrome.service.Service(executable_path='C:\chromedriver.exe'), options=options)
