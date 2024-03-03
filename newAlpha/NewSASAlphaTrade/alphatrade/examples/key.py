@@ -10,11 +10,11 @@ import pyotp
 
 #keyring.set_password("r**a", "password", "Trade1234?")
 
-keyring.set_password("c****a", "password", "Trade1234?")
+keyring.set_password("ch***a", "password", "Trade4321$")
 
-keyring.set_password("c****a", "username", "JM182")
+keyring.set_password("ch***a", "username", "JA186")
 
-keyring.set_password("c****a", "totpkey", "SKN7KXQQN76YLNEH")
+keyring.set_password("ch***a", "totpkey", "SKN7KXQQN76YLNEH")
 
 
 
@@ -23,9 +23,9 @@ keyring.set_password("c****a", "totpkey", "SKN7KXQQN76YLNEH")
 
 #print(keyring.get_password("r**a","password"))
 
-print(keyring.get_password("c****a","password"))
+print(keyring.get_password("ch***a","password"))
 
-print(keyring.get_password("c****a","username"))
+print(keyring.get_password("ch***a","username"))
 
 
 totp = pyotp.TOTP(keyring.get_password("ch***a","totpkey"))
