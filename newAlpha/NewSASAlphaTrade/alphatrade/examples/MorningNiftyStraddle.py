@@ -18,7 +18,7 @@ from SendNotifications import sendNotifications
 from SAS import createSession
 from strikes import getNiftyMonth,getNiftyWeeklyCall,getNiftyWeeklyPut,getNiftyATMStrikes,getNifty927Stoploss,getOptionInstrumentandPrices
 from Trade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrdersReentry,unsubscribeToPrices
-from Common import isExpiryDay,getNiftyFutureScrip,getNiftySpotScrip,getIndiaVixScrip
+from Common import isExpiryDay,getNiftyFutureScrip,getNiftySpotScrip,getIndiaVixScrip,niftyAcceptedDifference
 import os,sys
 import numpy as np
 
@@ -58,6 +58,8 @@ vix = 0
 vixInstrument = None
 
 lotSize = 50
+benchmarkDifference = niftyAcceptedDifference()
+atmPremiumDifference = 100
 
 
 def main():
@@ -89,14 +91,15 @@ def open_socket():
     ## Added for ATM from OC##
     global instruments
     global strikePrices
-    
+    global atmPremiumDifference 
+
     Nifty_FutScrip = getNiftyFutureScrip()
     Nifty_scrip = getNiftySpotScrip()
     vixInstrument = getIndiaVixScrip()
     
     while datetime.datetime.now().time() <= time(9,23):
-        sleep(30)
-        pass
+       sleep(30)
+       pass
     
     
     
@@ -126,7 +129,8 @@ def open_socket():
     
    
    
-    try:    
+    try:   
+        
         while order_placed == False:
             if isExpiryDay() == True:
                 niftyLTP = NiftySpot
@@ -153,41 +157,51 @@ def open_socket():
                    
             ## Added for ATM from OC##
        
-            try:       
-               sendNotifications('Calculating ATM using OC 920Nifty')
-               niftyAvgPrice = (NiftySpot + NiftyFut)/2.0
-               options = getOptionInstrumentandPrices(sas,Nifty_FutScrip,niftyAvgPrice)
-               sendNotifications(f'nifty avg price is {niftyAvgPrice}')
-               instruments = options[0]
-               strikePrices= options[1]
-             
-               
-               sas.subscribe_multiple_compact_marketdata(instruments) 
-               sleep(2)
-               response = sas.read_multiple_compact_marketdata()
-               sleep(3)
-               for resp in list(response.values()):
-                  
-                   event_handler_quote_update(resp)
-                   
-               sas.unsubscribe_multiple_compact_marketdata(instruments) 
-               
-               differentialPremiums = []
-               
-              
-               for index,prem in enumerate(premiums):
-                   if index%2 == 0:
-                       differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
-               
-               index_min = np.argmin(differentialPremiums)
-               
-               sendNotifications(f'strikes {strikePrices}')
-               sendNotifications(f'premiums {differentialPremiums}')
-               atm = strikePrices[index_min]
-               print(atm)
+            try:
+               while atmPremiumDifference > benchmarkDifference:
+                    sleep(3)      
+                    sendNotifications('Calculating ATM using Nifty')
+                    niftyAvgPrice = (NiftySpot + NiftyFut)/2.0
+
+                    sendNotifications(atmPremiumDifference)
+                    sendNotifications(benchmarkDifference)
+                    sendNotifications(NiftySpot)
+                    sendNotifications(NiftyFut) 
+                    options = getOptionInstrumentandPrices(sas,Nifty_FutScrip,niftyAvgPrice)
+                    sendNotifications(f'nifty avg price is {niftyAvgPrice}')
+                    instruments = options[0]
+                    strikePrices= options[1]
+                    
+                    
+                    sas.subscribe_multiple_compact_marketdata(instruments) 
+                    sleep(2)
+                    response = sas.read_multiple_compact_marketdata()
+                    sleep(3)
+                    for resp in list(response.values()):
+                        
+                        event_handler_quote_update(resp)
+                        
+                    sas.unsubscribe_multiple_compact_marketdata(instruments) 
+                    
+                    differentialPremiums = []
+                    
+                    
+                    for index,prem in enumerate(premiums):
+                        if index%2 == 0:
+                            differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
+                    
+                    index_min = np.argmin(differentialPremiums)
+                    
+                    sendNotifications(f'strikes {strikePrices}')
+                    sendNotifications(f'premiums {differentialPremiums}')
+                    atm = strikePrices[index_min]
+                    atmPremiumDifference = differentialPremiums[index_min]
+                    sendNotifications(f'Nifty ATM prem diff {atmPremiumDifference} and waiting')
+                    print(atm)
+                    pass
             except Exception as exep :
                 sendNotifications(exep) 
-
+            
             current_ltp = niftyLTP
 
             if atm:
