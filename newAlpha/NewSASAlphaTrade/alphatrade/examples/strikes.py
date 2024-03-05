@@ -100,11 +100,11 @@ def getBNWeeklyPut(sas,strike):
     return put
 
 def getUpperrefValue(price):
-    ref =  (price * .01) + price
+    ref =  (price * .0075) + price
     return int(ref)
     
 def getLowerrefValue(price):
-    ref =   price - (price * .01)
+    ref =   price - (price * .0075)
     return int(ref)
     
 def getBNHedgeStrike(order):
