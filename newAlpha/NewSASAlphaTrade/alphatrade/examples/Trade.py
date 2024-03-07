@@ -507,7 +507,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
     global preClosingSLModified
     sendNotifications(f'Watching stoporders {stratergy} with reentry')
     while tradeActive:
-        sleep(14)
+        sleep(5)
         filteredOrders = list(filter(lambda order:order.positionClosed == False,orders))
         
         
@@ -541,6 +541,9 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
             preClosingSLModified = True
             modifySLtoCost(sas,filteredOrders,stratergy)
             sendNotifications(f'SL modification completed {stratergy}')
+        if datetime.datetime.now().time() >= time(15,15):
+            sendNotifications(f'bye bye {stratergy} its 315')
+            break
         try:
             for order in filteredOrders:
                 

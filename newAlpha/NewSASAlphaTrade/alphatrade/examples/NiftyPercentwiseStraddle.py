@@ -172,7 +172,7 @@ def checkforTrade():
             event_handler_quote_update(resp)
         sas.unsubscribe_multiple_compact_marketdata(instruments) 
         niftyLTP = (NiftyFut + NiftySpot)/2.0
-        sendNotifications(niftyLTP)
+        #sendNotifications(niftyLTP)
         if (upperReference < niftyLTP and not upperSlotOver) or (niftyLTP < lowerReference and not lowerSlotOver):
             print('going for order')
             if upperReference < niftyLTP:
