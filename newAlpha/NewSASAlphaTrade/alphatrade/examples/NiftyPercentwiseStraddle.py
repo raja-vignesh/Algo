@@ -18,7 +18,7 @@ from strikes import getUpperrefValue,getLowerrefValue,getNiftyMonth,getNiftyWeek
 from Trade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrders,unsubscribeToPrices,watchStraddleStopOrdersReentry
 import os,sys
 import numpy as np
-from Common import isExpiryDay,readContentsofFile,getNiftyFutureScrip,getNiftySpotScrip
+from Common import isExpiryDay,readContentsofFile,getNiftyFutureScrip,getNiftySpotScrip,niftyAcceptedDifference
 
 quantity = 1
 lotSize = 50
@@ -56,6 +56,8 @@ instruments = []
 strikePrices = []
 premiums = [0] * 12
 ## Added for ATM from OC##
+benchmarkDifference = niftyAcceptedDifference()
+atmPremiumDifference = 100
 
 def main():
     logging.debug('main')
@@ -197,7 +199,8 @@ def createOrder():
     ## Added for ATM from OC##
     global instruments
     global strikePrices
-    
+    global atmPremiumDifference 
+
     try:    
         current_ltp = niftyLTP
         sendNotifications(" Nifty price is :: " + str(current_ltp))
@@ -205,36 +208,44 @@ def createOrder():
         ## Added for ATM from OC##
    
         try: 
-            sendNotifications('Calculating ATM using OC')
-            NiftyAvgPrice = round((NiftySpot + NiftyFut) / 2.0,2)
-            sendNotifications(f'Nifty avg price is {NiftyAvgPrice}')
-            options = getOptionInstrumentandPrices(sas,Nifty_FutScrip,NiftyAvgPrice)
+            while atmPremiumDifference > benchmarkDifference:
+                sendNotifications('Calculating ATM using OC')
+                NiftyAvgPrice = round((NiftySpot + NiftyFut) / 2.0,2)
+                sendNotifications(f'Nifty avg price is {NiftyAvgPrice}')
+                sendNotifications(atmPremiumDifference)
+                sendNotifications(benchmarkDifference)
+                sendNotifications(NiftySpot)
+                sendNotifications(NiftyFut) 
+                options = getOptionInstrumentandPrices(sas,Nifty_FutScrip,NiftyAvgPrice)
+                
+                instruments = options[0]
+                strikePrices= options[1]
             
-            instruments = options[0]
-            strikePrices= options[1]
-          
-            sas.subscribe_multiple_compact_marketdata(instruments) 
-            sleep(2)
-            response = sas.read_multiple_compact_marketdata()
-            sleep(3)
-            for resp in list(response.values()):
-                  
-                   event_handler_quote_update(resp)
-                   
-            sas.unsubscribe_multiple_compact_marketdata(instruments)
-            
-            differentialPremiums = []
-            
+                sas.subscribe_multiple_compact_marketdata(instruments) 
+                sleep(2)
+                response = sas.read_multiple_compact_marketdata()
+                sleep(3)
+                for resp in list(response.values()):
+                    
+                    event_handler_quote_update(resp)
+                    
+                sas.unsubscribe_multiple_compact_marketdata(instruments)
+                
+                differentialPremiums = []
+                
 
-            for index,prem in enumerate(premiums):
-                if index%2 == 0:
-                    differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
-            
-            sendNotifications(f'strikes {strikePrices}')
-            sendNotifications(f'premiums {differentialPremiums}')
-            index_min = np.argmin(differentialPremiums)
-            atm = strikePrices[index_min]
-            print(atm)
+                for index,prem in enumerate(premiums):
+                    if index%2 == 0:
+                        differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
+                
+                sendNotifications(f'strikes {strikePrices}')
+                sendNotifications(f'premiums {differentialPremiums}')
+                index_min = np.argmin(differentialPremiums)
+                atm = strikePrices[index_min]
+                atmPremiumDifference = differentialPremiums[index_min]
+                sendNotifications(f'Nifty ATM prem diff {atmPremiumDifference} and waiting')   
+                print(atm)
+                pass
         except Exception as exep :
             sendNotifications(f'{exep}')
 
