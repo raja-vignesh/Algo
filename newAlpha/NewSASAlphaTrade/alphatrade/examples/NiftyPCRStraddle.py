@@ -73,7 +73,9 @@ S3 = 0.0
 S4 = 0.0
 tradeTriggered = False
 tradeActivated = False
-
+triggeredBy = None
+TRIGGERED = 'triggered'
+ACTIVATED = 'activated'
 def main():
     global sas
     while sas is None:
@@ -114,7 +116,9 @@ def open_socket():
     global S2 
     global S3 
     global S4 
-
+    global triggeredBy
+    global TRIGGERED
+    global ACTIVATED 
     Nifty_FutScrip = getNiftyFutureScrip()
     Nifty_scrip = getNiftySpotScrip()
     vixInstrument = getIndiaVixScrip()
@@ -155,9 +159,9 @@ def open_socket():
         for resp in list(response.values()):
             event_handler_quote_update(resp)
         if not tradeTriggered:
-            tradeTriggered = checkTheRange(NiftySpot,"triggered")
+            tradeTriggered = checkTheRange(NiftySpot,TRIGGERED)
         if tradeTriggered and not tradeActivated:
-            tradeActivated = checkTheRange(NiftySpot,"activated")
+            tradeActivated = checkTheRange(NiftySpot,ACTIVATED)
         pass
     sas.unsubscribe_multiple_detailed_marketdata(instruments) 
     
@@ -294,37 +298,71 @@ def checkTheRange(ltp,cndn):
     global S3 
     global S4 
     global rangeDifference
+    global triggeredBy
+    global TRIGGERED
+    global ACTIVATED 
     if Pivot - rangeDifference <= ltp <= Pivot + rangeDifference:
         sendNotifications(f"Trade {cndn} by pivot condition")
+        if cndn == TRIGGERED:
+            triggeredBy = 'Pivot'
+        elif cndn == ACTIVATED and triggeredBy == 'Pivot':
+            return False
         return True
     elif R1 - rangeDifference <= ltp <= R1 + rangeDifference:
         sendNotifications(f"Trade {cndn} by R1 condition")
+        if cndn == TRIGGERED:
+            triggeredBy = 'R1'
+        elif cndn == ACTIVATED and triggeredBy == 'R1':
+            return False
         return True
     elif R2 - rangeDifference <= ltp <= R2 + rangeDifference:
         sendNotifications(f"Trade {cndn} by R2 condition")
+        if cndn == TRIGGERED:
+            triggeredBy = 'R2'
+        elif cndn == ACTIVATED and triggeredBy == 'R2':
+            return False
         return True
     elif R3 - rangeDifference <= ltp <= R3 + rangeDifference:
         sendNotifications(f"Trade {cndn} by R3 condition")
+        if cndn == TRIGGERED:
+            triggeredBy = 'R3'
+        elif cndn == ACTIVATED and triggeredBy == 'R3':
+            return False
         return True
-        # Additional actions if trade is triggered
     elif R4 - rangeDifference <= ltp <= R4 + rangeDifference:
         sendNotifications(f"Trade {cndn} by R4 condition")
+        if cndn == TRIGGERED:
+            triggeredBy = 'R4'
+        elif cndn == ACTIVATED and triggeredBy == 'R4':
+            return False
         return True
-        # Additional actions if trade is triggered
     elif S1 - rangeDifference <= ltp <= S1 + rangeDifference:
         sendNotifications(f"Trade {cndn} by S1 condition")
+        if cndn == TRIGGERED:
+            triggeredBy = 'S1'
+        elif cndn == ACTIVATED and triggeredBy == 'S1':
+            return False
         return True
-        # Additional actions if trade is triggered
     elif S2 - rangeDifference <= ltp <= S2 + rangeDifference:
         sendNotifications(f"Trade {cndn} by S2 condition")
+        if cndn == TRIGGERED:
+            triggeredBy = 'S2'
+        elif cndn == ACTIVATED and triggeredBy == 'S2':
+            return False
         return True
-        # Additional actions if trade is triggered
     elif S3 - rangeDifference <= ltp <= S3 + rangeDifference:
         sendNotifications(f"Trade {cndn} by S3 condition")
+        if cndn == TRIGGERED:
+            triggeredBy = 'S3'
+        elif cndn == ACTIVATED and triggeredBy == 'S3':
+            return False
         return True
-        # Additional actions if trade is triggered
     elif S4 - rangeDifference <= ltp <= S4 + rangeDifference:
         sendNotifications(f"Trade  {cndn} by S4 condition")
+        if cndn == TRIGGERED:
+            triggeredBy = 'S4'
+        elif cndn == ACTIVATED and triggeredBy == 'S4':
+            return False
         return True
     else:
         return False
