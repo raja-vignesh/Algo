@@ -18,7 +18,7 @@ from SendNotifications import sendNotifications
 from SAS import createSession
 from strikes import getNiftyMonth,getNiftyWeeklyCall,getNiftyWeeklyPut,getNiftyATMStrikes,getNifty927Stoploss,getOptionInstrumentandPrices
 from Trade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrdersReentry,unsubscribeToPrices
-from Common import isExpiryDay,getNiftyFutureScrip,getNiftySpotScrip,getIndiaVixScrip,niftyAcceptedDifference
+from Common import isExpiryDay,getNiftyFutureScrip,getNiftySpotScrip,getIndiaVixScrip,niftyAcceptedDifference,readContentsofFile
 import os,sys
 import numpy as np
 
@@ -127,8 +127,14 @@ def open_socket():
 
     order_placed = False
     
-   
-   
+    output_file = "NiftyCPR.txt"
+    if os.path.exists(output_file):
+        txt = readContentsofFile(output_file)
+        sendNotifications(txt)
+        cpr_levels = eval(txt)
+        sendNotifications(cpr_levels['pivot'])
+    exit(0)
+
     try:   
         
         while order_placed == False:
@@ -329,7 +335,7 @@ def placeStopOrders():
 
     
 if(__name__ == '__main__'):
-    logging.debug('Morning Nifty Starddle started')
-    sendNotifications('Morning Nifty Starddle started')
+    logging.debug(' Nifty ORB started')
+    sendNotifications('Nifty  ORB started')
     #while True:
     main()
