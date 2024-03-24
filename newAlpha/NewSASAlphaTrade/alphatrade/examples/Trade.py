@@ -146,7 +146,7 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,fullPremium=False,
                 modifiedSL = getNiftyExpiryTradesSL()
                 order.stoplossPrice = float(order.tradedPrice) + (float(order.tradedPrice) * modifiedSL)
                 sendNotifications("Print 3")
-            elif order.indexType == IndexType.NIFTY and ( stratergy == 'MorningNiftyStraddle' or stratergy == 'PercentwiseStraddle'):
+            elif order.indexType == IndexType.NIFTY and ( stratergy == 'MorningNiftyStraddle' or stratergy == 'PercentwiseStraddle' or stratergy == 'NiftyCPR'):
                 if order.strikeType == StrikeType.CALL:
                     modifiedSL = callSL
                 elif order.strikeType == StrikeType.PUT:
@@ -524,7 +524,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                 preparedOrders = []
                 preparedOrders.append(order)
                 order.positionClosed = False
-                if (stratergy == 'MorningNiftyStraddle' or stratergy == 'PercentwiseStraddle'):
+                if (stratergy == 'MorningNiftyStraddle' or stratergy == 'PercentwiseStraddle' or stratergy == 'NiftyCPR'):
                     sendNotifications(f'{order.strike} {order.strikeType}  nifty  reentered ') 
                     if order.strikeType == StrikeType.CALL:
                         placeStraddleStopOders(sas,preparedOrders,modifiedSL,' Nifty call reordered SL added')

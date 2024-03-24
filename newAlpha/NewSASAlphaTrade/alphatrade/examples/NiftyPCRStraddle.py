@@ -62,6 +62,18 @@ benchmarkDifference = niftyAcceptedDifference()
 atmPremiumDifference = 100
 
 
+Pivot = 0.0
+R1 = 0.0
+R2 = 0.0
+R3 = 0.0
+R4 = 0.0
+S1 = 0.0
+S2 = 0.0
+S3 = 0.0
+S4 = 0.0
+tradeTriggered = False
+tradeActivated = False
+
 def main():
     global sas
     while sas is None:
@@ -87,11 +99,21 @@ def open_socket():
     global vix
     global vixInstrument
     global orders
-    
+    global tradeTriggered,tradeActivated
     ## Added for ATM from OC##
     global instruments
     global strikePrices
     global atmPremiumDifference 
+
+    global Pivot
+    global R1
+    global R2 
+    global R3 
+    global R4 
+    global S1
+    global S2 
+    global S3 
+    global S4 
 
     Nifty_FutScrip = getNiftyFutureScrip()
     Nifty_scrip = getNiftySpotScrip()
@@ -101,7 +123,22 @@ def open_socket():
     #   sleep(30)
     #   pass
     
-    
+    output_file = "NiftyCPR.txt"
+    if os.path.exists(output_file):
+        txt = readContentsofFile(output_file)
+        sendNotifications(txt)
+        cpr_levels = eval(txt)
+        Pivot = cpr_levels['pivot']
+        R1 = cpr_levels['r1']
+        R2 = cpr_levels['r2']
+        R3 = cpr_levels['r3']
+        R4 = cpr_levels['r4']
+        S1 = cpr_levels['s1']
+        S2 = cpr_levels['s2']
+        S3 = cpr_levels['s3']
+        S4 = cpr_levels['s4']
+        print(Pivot,R1,R2,R3,R4,S1,S2,S3,S4)
+        sendNotifications("CPR loaded")
     
     sendNotifications("Script Start Time :: " + str(datetime.datetime.now()))
     
@@ -109,17 +146,28 @@ def open_socket():
     sas.run_socket()
     socket_opened = True
 
-
-
-    instruments = [Nifty_FutScrip,Nifty_scrip,vixInstrument]
+    instruments = [Nifty_scrip]
+    sas.subscribe_multiple_detailed_marketdata(instruments) 
+    sendNotifications("Starting checks hoo hooo...")
+    while not tradeTriggered and not tradeActivated:
+        sleep(1)
+        sendNotifications("checking in loop")
+        response = sas.read_multiple_detailed_marketdata()
+        for resp in list(response.values()):
+            event_handler_quote_update(resp)
+        if not tradeTriggered:
+            tradeTriggered = checkTheRange(NiftySpot,"triggered")
+        if tradeTriggered and not tradeActivated:
+            tradeActivated = checkTheRange(NiftySpot,"activated")
+        pass
+    sas.unsubscribe_multiple_detailed_marketdata(instruments) 
+    
+    instruments = [Nifty_FutScrip,Nifty_scrip]
     sas.subscribe_multiple_detailed_marketdata(instruments) 
     sleep(1)
     response = sas.read_multiple_detailed_marketdata()
 
-
-
-    for resp in list(response.values()):
-       
+    for resp in list(response.values()):      
         event_handler_quote_update(resp)
     
         
@@ -127,12 +175,7 @@ def open_socket():
 
     order_placed = False
     
-    output_file = "NiftyCPR.txt"
-    if os.path.exists(output_file):
-        txt = readContentsofFile(output_file)
-        sendNotifications(txt)
-        cpr_levels = eval(txt)
-        sendNotifications(cpr_levels['pivot'])
+    
     exit(0)
 
     try:   
@@ -246,7 +289,52 @@ def open_socket():
                 sendNotifications('12:33 Nifty Starddle orders placed and the activity completed')
                 logging.debug('exiting script')
                 break
-    
+
+def checkTheRange(ltp,cndn):
+    global Pivot
+    global R1
+    global R2 
+    global R3 
+    global R4 
+    global S1
+    global S2 
+    global S3 
+    global S4 
+    if Pivot - 10 <= ltp <= Pivot + 10:
+        sendNotifications(f"Trade {cndn} by pivot condition")
+        return True
+    elif R1 - 10 <= ltp <= R1 + 10:
+        sendNotifications(f"Trade {cndn} by R1 condition")
+        return True
+    elif R2 - 10 <= ltp <= R2 + 10:
+        sendNotifications(f"Trade {cndn} by R2 condition")
+        return True
+    elif R3 - 10 <= ltp <= R3 + 10:
+        sendNotifications(f"Trade {cndn} by R3 condition")
+        return True
+        # Additional actions if trade is triggered
+    elif R4 - 10 <= ltp <= R4 + 10:
+        sendNotifications(f"Trade {cndn} by R4 condition")
+        return True
+        # Additional actions if trade is triggered
+    elif S1 - 10 <= ltp <= S1 + 10:
+        sendNotifications(f"Trade {cndn} by S1 condition")
+        return True
+        # Additional actions if trade is triggered
+    elif S2 - 10 <= ltp <= S2 + 10:
+        sendNotifications(f"Trade {cndn} by S2 condition")
+        return True
+        # Additional actions if trade is triggered
+    elif S3 - 10 <= ltp <= S3 + 10:
+        sendNotifications(f"Trade {cndn} by S3 condition")
+        return True
+        # Additional actions if trade is triggered
+    elif S4 - 10 <= ltp <= S4 + 10:
+        sendNotifications(f"Trade  {cndn} by S4 condition")
+        return True
+    else:
+        return False
+
 def event_handler_quote_update(message):
     global ltp
     global niftyLTP
@@ -325,9 +413,9 @@ def placeStopOrders():
     global sas
     global orders
     
-    placeStraddleStopOders(sas,orders,stoploss,stratergy='NiftyORB',SLCorrection=True)
+    placeStraddleStopOders(sas,orders,stoploss,stratergy='NiftyCPR',SLCorrection=True)
     tradeActive = True
-    watchStraddleStopOrdersReentry(sas,orders,tradeActive,'NiftyORB',reentry=True)
+    watchStraddleStopOrdersReentry(sas,orders,tradeActive,'NiftyCPR',reentry=True)
 
 
 ##############################################################
@@ -335,7 +423,7 @@ def placeStopOrders():
 
     
 if(__name__ == '__main__'):
-    logging.debug(' Nifty ORB started')
-    sendNotifications('Nifty  ORB started')
+    logging.debug(' Nifty CPR started')
+    sendNotifications('Nifty  CPR started')
     #while True:
     main()
