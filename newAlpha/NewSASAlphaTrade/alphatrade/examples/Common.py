@@ -105,5 +105,5 @@ def bankNiftyAcceptedDifference():
     return 40.0
 
 def niftyAcceptedDifference():
-    return 10.0
+    return 8.0
     

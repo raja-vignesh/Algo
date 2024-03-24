@@ -9,8 +9,8 @@ from time import sleep
 from datetime import date,time,timedelta
 import datetime
 from Orders import placeMarketOrders,placeStopLossMarketorder,getOrderHistory,getTradedPriceOfOrder,getDaywisePositions,getPendingOrders,cancelOrder
-#from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
-from alice_blue import LiveFeedType,TransactionType,OrderType,ProductType
+from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
+#from alice_blue import LiveFeedType,TransactionType,OrderType,ProductType
 
 from SendNotifications import sendNotifications
 from SAS import createSession,reConnectSession
@@ -34,7 +34,7 @@ def main():
         if sas == None:
             sleep(120)
             pass
-    readVixValue()
+    #readVixValue()
     calculateMTM()
     
 def readVixValue():

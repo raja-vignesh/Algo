@@ -45,6 +45,7 @@ NiftyFut = 0.0
 
 ## Added for ATM from OC##
 instruments = []
+instrumentsList=[]
 strikePrices = []
 premiums = [0] * 12
 ## Added for ATM from OC##
@@ -87,7 +88,7 @@ def open_socket():
     global vix
     global vixInstrument
     global orders
-    
+    global instrumentsList
     ## Added for ATM from OC##
     global instruments
     global strikePrices
@@ -123,7 +124,7 @@ def open_socket():
         event_handler_quote_update(resp)
     
         
-    sas.unsubscribe_multiple_compact_marketdata(instruments) 
+    #sas.unsubscribe_multiple_compact_marketdata(instruments) 
 
     order_placed = False
     
@@ -169,29 +170,25 @@ def open_socket():
                     sendNotifications(NiftyFut) 
                     options = getOptionInstrumentandPrices(sas,Nifty_FutScrip,niftyAvgPrice)
                     sendNotifications(f'nifty avg price is {niftyAvgPrice}')
-                    instruments = options[0]
+                    instrumentsList = options[0]
                     strikePrices= options[1]
                     
-                    
-                    sas.subscribe_multiple_compact_marketdata(instruments) 
+                    sas.subscribe_multiple_compact_marketdata(instrumentsList) 
                     sleep(2)
+
                     response = sas.read_multiple_compact_marketdata()
                     sleep(3)
                     for resp in list(response.values()):
-                        
                         event_handler_quote_update(resp)
                         
-                    sas.unsubscribe_multiple_compact_marketdata(instruments) 
-                    
+                    sas.unsubscribe_multiple_compact_marketdata(instrumentsList) 
                     differentialPremiums = []
-                    
                     
                     for index,prem in enumerate(premiums):
                         if index%2 == 0:
                             differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
                     
                     index_min = np.argmin(differentialPremiums)
-                    
                     sendNotifications(f'strikes {strikePrices}')
                     sendNotifications(f'premiums {differentialPremiums}')
                     atm = strikePrices[index_min]
@@ -203,6 +200,7 @@ def open_socket():
                 sendNotifications(exep) 
             
             current_ltp = niftyLTP
+            sas.unsubscribe_multiple_compact_marketdata(instruments) 
 
             if atm:
                 callATMOrder.strike,putATMOrder.strike = atm,atm
@@ -219,8 +217,8 @@ def open_socket():
             sendNotifications(f"Nifty spot is {NiftySpot} and fut is {NiftyFut}")
             sendNotifications("Nifty price is :: " + str(current_ltp))
             #call = getNiftyWeeklyCall(sas,callATMOrder.strike)
-            callATMOrder.instrument = instruments[index_min * 2]
-            putATMOrder.instrument = instruments[(index_min * 2) + 1]
+            callATMOrder.instrument = instrumentsList[index_min * 2]
+            putATMOrder.instrument = instrumentsList[(index_min * 2) + 1]
             callATMOrder.instrumentToken = callATMOrder.instrument['instrumentToken']
             putATMOrder.instrumentToken = putATMOrder.instrument['instrumentToken']
             callATMOrder.quantity = lotSize * quantity
@@ -266,7 +264,7 @@ def event_handler_quote_update(message):
     
     global vix
     global vixInstrument
-    
+    global instrumentsList
     global instruments
     global premiums
     global strikePrices
@@ -283,29 +281,29 @@ def event_handler_quote_update(message):
         putATMOrder.ltp = ltp
     elif message['instrument_token']  == vixInstrument['instrumentToken']:
             vix = ltp
-    elif message['instrument_token'] == instruments[0]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[0]['instrumentToken']:
          premiums[0]= ltp
-    elif message['instrument_token'] == instruments[1]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[1]['instrumentToken']:
          premiums[1]= ltp
-    elif message['instrument_token'] == instruments[2]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[2]['instrumentToken']:
          premiums[2]= ltp
-    elif message['instrument_token'] == instruments[3]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[3]['instrumentToken']:
          premiums[3]= ltp
-    elif message['instrument_token'] == instruments[4]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[4]['instrumentToken']:
          premiums[4]= ltp
-    elif message['instrument_token'] == instruments[5]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[5]['instrumentToken']:
          premiums[5]= ltp
-    elif message['instrument_token'] == instruments[6]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[6]['instrumentToken']:
          premiums[6]= ltp
-    elif message['instrument_token'] == instruments[7]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[7]['instrumentToken']:
          premiums[7]= ltp
-    elif message['instrument_token'] == instruments[8]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[8]['instrumentToken']:
          premiums[8]= ltp
-    elif message['instrument_token'] == instruments[9]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[9]['instrumentToken']:
          premiums[9]= ltp
-    elif message['instrument_token'] == instruments[10]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[10]['instrumentToken']:
          premiums[10]= ltp
-    elif message['instrument_token'] == instruments[11]['instrumentToken']:
+    elif message['instrument_token'] == instrumentsList[11]['instrumentToken']:
          premiums[11]= ltp
 
 
