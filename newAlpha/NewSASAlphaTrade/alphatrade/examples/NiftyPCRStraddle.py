@@ -18,13 +18,13 @@ from SendNotifications import sendNotifications
 from SAS import createSession
 from strikes import getNiftyMonth,getNiftyWeeklyCall,getNiftyWeeklyPut,getNiftyATMStrikes,getNifty927Stoploss,getOptionInstrumentandPrices
 from Trade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrdersReentry,unsubscribeToPrices
-from Common import isExpiryDay,getNiftyFutureScrip,getNiftySpotScrip,getIndiaVixScrip,niftyAcceptedDifference,readContentsofFile
+from Common import isExpiryDay,getNiftyFutureScrip,getNiftySpotScrip,getIndiaVixScrip,niftyAcceptedDifference,readContentsofFile,getNiftyCPRDifference
 import os,sys
 import numpy as np
 
 callATMOrder = SellOrder(StrikeType.CALL,IndexType.NIFTY,False)
 putATMOrder =  SellOrder(StrikeType.PUT,IndexType.NIFTY,False)
-
+rangeDifference = getNiftyCPRDifference()
 # callATMOrder.quantity = 50 * 1
 # putATMOrder.quantity = 50 * 1
 
@@ -151,7 +151,6 @@ def open_socket():
     sendNotifications("Starting checks hoo hooo...")
     while not tradeTriggered and not tradeActivated:
         sleep(1)
-        sendNotifications("checking in loop")
         response = sas.read_multiple_detailed_marketdata()
         for resp in list(response.values()):
             event_handler_quote_update(resp)
@@ -175,9 +174,6 @@ def open_socket():
 
     order_placed = False
     
-    
-    exit(0)
-
     try:   
         
         while order_placed == False:
@@ -188,10 +184,7 @@ def open_socket():
                     niftyLTP = NiftyFut
                 else:
                     niftyLTP = (NiftySpot + NiftyFut)/2.0
-                    
-           
-              
-                   
+    
             ## Added for ATM from OC##
        
             try:
@@ -300,36 +293,37 @@ def checkTheRange(ltp,cndn):
     global S2 
     global S3 
     global S4 
-    if Pivot - 10 <= ltp <= Pivot + 10:
+    global rangeDifference
+    if Pivot - rangeDifference <= ltp <= Pivot + rangeDifference:
         sendNotifications(f"Trade {cndn} by pivot condition")
         return True
-    elif R1 - 10 <= ltp <= R1 + 10:
+    elif R1 - rangeDifference <= ltp <= R1 + rangeDifference:
         sendNotifications(f"Trade {cndn} by R1 condition")
         return True
-    elif R2 - 10 <= ltp <= R2 + 10:
+    elif R2 - rangeDifference <= ltp <= R2 + rangeDifference:
         sendNotifications(f"Trade {cndn} by R2 condition")
         return True
-    elif R3 - 10 <= ltp <= R3 + 10:
+    elif R3 - rangeDifference <= ltp <= R3 + rangeDifference:
         sendNotifications(f"Trade {cndn} by R3 condition")
         return True
         # Additional actions if trade is triggered
-    elif R4 - 10 <= ltp <= R4 + 10:
+    elif R4 - rangeDifference <= ltp <= R4 + rangeDifference:
         sendNotifications(f"Trade {cndn} by R4 condition")
         return True
         # Additional actions if trade is triggered
-    elif S1 - 10 <= ltp <= S1 + 10:
+    elif S1 - rangeDifference <= ltp <= S1 + rangeDifference:
         sendNotifications(f"Trade {cndn} by S1 condition")
         return True
         # Additional actions if trade is triggered
-    elif S2 - 10 <= ltp <= S2 + 10:
+    elif S2 - rangeDifference <= ltp <= S2 + rangeDifference:
         sendNotifications(f"Trade {cndn} by S2 condition")
         return True
         # Additional actions if trade is triggered
-    elif S3 - 10 <= ltp <= S3 + 10:
+    elif S3 - rangeDifference <= ltp <= S3 + rangeDifference:
         sendNotifications(f"Trade {cndn} by S3 condition")
         return True
         # Additional actions if trade is triggered
-    elif S4 - 10 <= ltp <= S4 + 10:
+    elif S4 - rangeDifference <= ltp <= S4 + rangeDifference:
         sendNotifications(f"Trade  {cndn} by S4 condition")
         return True
     else:

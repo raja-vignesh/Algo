@@ -15,7 +15,8 @@ import os
 #Sat 5
 #Sun 6
 
-
+def getNiftyCPRDifference():
+    return 6
 
 def getBankNiftyFutureScrip():
     return {'exchangeCode': 2, 'instrumentToken': 82221}
