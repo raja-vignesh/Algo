@@ -194,8 +194,8 @@ def calculate_cpr(data):
     # Calculate Support and Resistance Levels
     r1 = round((pivot * 2) - low)
     s1 = round((pivot * 2) - high)
-    r2 = round(pivot + (tc - pivot))
-    s2 = round(pivot - (tc - pivot))
+    r2 = round(pivot + (high - low))
+    s2 = round(pivot - (high - low))
     r3 = round(r1 + (high - low))
     s3 = round(s1 - (high - low))
     r4 = round(r3 + (r2 - r1))
