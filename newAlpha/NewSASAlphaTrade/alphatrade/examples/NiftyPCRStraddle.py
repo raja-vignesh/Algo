@@ -153,7 +153,7 @@ def open_socket():
     instruments = [Nifty_scrip]
     sas.subscribe_multiple_detailed_marketdata(instruments) 
     sendNotifications("Starting checks hoo hooo...")
-    while not tradeTriggered and not tradeActivated:
+    while not tradeTriggered or not tradeActivated:
         sleep(1)
         response = sas.read_multiple_detailed_marketdata()
         for resp in list(response.values()):
@@ -263,8 +263,7 @@ def open_socket():
             orders.append(putATMOrder)
             sleep(1)
             
-            #placeOrders()
-            
+            placeOrders()
             order_placed = True
             
     except Exception as exep :
@@ -302,68 +301,105 @@ def checkTheRange(ltp,cndn):
     global TRIGGERED
     global ACTIVATED 
     if Pivot - rangeDifference <= ltp <= Pivot + rangeDifference:
-        sendNotifications(f"Trade {cndn} by pivot condition")
         if cndn == TRIGGERED:
             triggeredBy = 'Pivot'
-        elif cndn == ACTIVATED and triggeredBy == 'Pivot':
-            return False
-        return True
+            sendNotifications(f"Trade {cndn} by pivot condition")
+            return True
+        elif cndn == ACTIVATED :
+            if triggeredBy == 'Pivot':
+                return False
+            else: 
+                sendNotifications(f"Trade {cndn} by pivot condition")
+                return True
     elif R1 - rangeDifference <= ltp <= R1 + rangeDifference:
-        sendNotifications(f"Trade {cndn} by R1 condition")
         if cndn == TRIGGERED:
             triggeredBy = 'R1'
-        elif cndn == ACTIVATED and triggeredBy == 'R1':
-            return False
-        return True
+            sendNotifications(f"Trade {cndn} by R1 condition")
+            return True
+        elif cndn == ACTIVATED :
+            if triggeredBy == 'R1':
+                return False
+            else:
+                sendNotifications(f"Trade {cndn} by R1 condition")
+                return True
     elif R2 - rangeDifference <= ltp <= R2 + rangeDifference:
-        sendNotifications(f"Trade {cndn} by R2 condition")
         if cndn == TRIGGERED:
+            sendNotifications(f"Trade {cndn} by R2 condition")
             triggeredBy = 'R2'
-        elif cndn == ACTIVATED and triggeredBy == 'R2':
-            return False
-        return True
+            return True
+        elif cndn == ACTIVATED:
+            if triggeredBy == 'R2':
+                return False
+            else:
+                sendNotifications(f"Trade {cndn} by R2 condition")
+                return True
     elif R3 - rangeDifference <= ltp <= R3 + rangeDifference:
-        sendNotifications(f"Trade {cndn} by R3 condition")
         if cndn == TRIGGERED:
             triggeredBy = 'R3'
-        elif cndn == ACTIVATED and triggeredBy == 'R3':
-            return False
-        return True
+            sendNotifications(f"Trade {cndn} by R3 condition")
+            return True
+
+        elif cndn == ACTIVATED:
+            if triggeredBy == 'R3':
+                return False
+            else:
+                sendNotifications(f"Trade {cndn} by R3 condition")
+                return True
     elif R4 - rangeDifference <= ltp <= R4 + rangeDifference:
-        sendNotifications(f"Trade {cndn} by R4 condition")
         if cndn == TRIGGERED:
             triggeredBy = 'R4'
-        elif cndn == ACTIVATED and triggeredBy == 'R4':
-            return False
-        return True
+            sendNotifications(f"Trade {cndn} by R4 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'R4':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by R4 condition")
+                return True
     elif S1 - rangeDifference <= ltp <= S1 + rangeDifference:
-        sendNotifications(f"Trade {cndn} by S1 condition")
         if cndn == TRIGGERED:
             triggeredBy = 'S1'
-        elif cndn == ACTIVATED and triggeredBy == 'S1':
-            return False
-        return True
+            sendNotifications(f"Trade {cndn} by S1 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'S1':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by S1 condition")
+                return True
     elif S2 - rangeDifference <= ltp <= S2 + rangeDifference:
-        sendNotifications(f"Trade {cndn} by S2 condition")
         if cndn == TRIGGERED:
             triggeredBy = 'S2'
-        elif cndn == ACTIVATED and triggeredBy == 'S2':
-            return False
-        return True
+            sendNotifications(f"Trade {cndn} by S2 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'S2':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by S2 condition")
+                return True
     elif S3 - rangeDifference <= ltp <= S3 + rangeDifference:
-        sendNotifications(f"Trade {cndn} by S3 condition")
-        if cndn == TRIGGERED:
+         if cndn == TRIGGERED:
             triggeredBy = 'S3'
-        elif cndn == ACTIVATED and triggeredBy == 'S3':
-            return False
-        return True
+            sendNotifications(f"Trade {cndn} by S3 condition")
+            return True
+         elif cndn == ACTIVATED:
+             if triggeredBy == 'S3':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by S3 condition")
+                return True
     elif S4 - rangeDifference <= ltp <= S4 + rangeDifference:
-        sendNotifications(f"Trade  {cndn} by S4 condition")
         if cndn == TRIGGERED:
             triggeredBy = 'S4'
-        elif cndn == ACTIVATED and triggeredBy == 'S4':
-            return False
-        return True
+            sendNotifications(f"Trade {cndn} by S4 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'S4':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by S4 condition")
+                return True
     else:
         return False
 

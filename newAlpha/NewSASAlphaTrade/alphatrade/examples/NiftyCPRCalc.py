@@ -164,11 +164,18 @@ def open_socket():
 
 def write_to_file(cpr_levels, filename):
     
-    mode = 'w'  # default mode is 'write' (overwrite existing content)
-    if os.path.exists(filename):
-        mode = 'w'  # if file exists, overwrite existing content
-    with open(filename, mode) as file:
-        file.write(str(cpr_levels))
+    # mode = 'w'  # default mode is 'write' (overwrite existing content)
+    # if os.path.exists(filename):
+    #     mode = 'w'  # if file exists, overwrite existing content
+    # with open(filename, mode) as file:
+    #     file.write(str(cpr_levels))
+
+    if not os.path.exists(filename):
+        with open(filename, 'w') as textFile:
+            textFile.write(str(cpr_levels))
+    elif os.path.exists(filename):
+        with open(filename, 'w') as textFile:
+            textFile.write(str(cpr_levels))
 
 def calculate_cpr(data):
     """
