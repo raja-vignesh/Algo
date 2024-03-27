@@ -252,7 +252,7 @@ def event_handler_quote_update(message):
     OpenNifty = message['open_price'] * .01
     HighNifty = message['high_price'] * .01
     LowNifty = message['low_price'] * .01
-    CloseNifty = message['close_price'] * .01
+    CloseNifty = message['last_traded_price'] * .01
 
     if  message['instrument_token'] == Nifty_scrip['instrumentToken']:
         NiftySpot = ltp
