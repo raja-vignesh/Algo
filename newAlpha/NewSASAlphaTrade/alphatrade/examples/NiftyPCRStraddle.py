@@ -164,6 +164,10 @@ def open_socket():
             tradeActivated = checkTheRange(NiftySpot,ACTIVATED)
         pass
     sas.unsubscribe_multiple_detailed_marketdata(instruments) 
+
+    if datetime.datetime.now().time() >= time(14,55): 
+        sendNotifications('CPR is tired... snooze')
+        exit(0)
     
     instruments = [Nifty_FutScrip,Nifty_scrip]
     sas.subscribe_multiple_detailed_marketdata(instruments) 
