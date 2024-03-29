@@ -29,7 +29,7 @@ def getIndiaVixScrip():
 
 
 def getNiftyFutureScrip():
-    return {'exchangeCode': 2, 'instrumentToken': 36612}
+    return {'exchangeCode': 2, 'instrumentToken': 52222}
 
 def getNiftySpotScrip():
     return {'exchangeCode': 1, 'instrumentToken': 26000}
