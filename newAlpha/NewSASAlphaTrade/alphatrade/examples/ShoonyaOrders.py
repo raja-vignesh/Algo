@@ -8,7 +8,7 @@ Created on Sun Aug 22 21:53:34 2021
 from alphatrade import ProductType,OrderType,TransactionType
 from SendNotifications import sendNotifications
 import enum
-from Shoonya import getConnectionObject,reGenerateToken
+from ShoonyaSession import getConnectionObject,reGenerateToken
 from time import sleep
 from Common import format_option_symbol,convert_transaction_type
 

@@ -1,4 +1,4 @@
-from Shoonya import createShoonyaSession 
+from ShoonyaSession import createShoonyaSession 
 
 class ShoonyaAPITester:
     def __init__(self):

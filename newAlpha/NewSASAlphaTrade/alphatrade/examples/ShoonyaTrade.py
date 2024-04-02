@@ -16,7 +16,7 @@ from datetime import date,time,timedelta
 import datetime
 import logging
 from SAS import createSession,reConnectSession
-from Shoonya import createShoonyaSession
+from ShoonyaSession import createShoonyaSession
 from AVSLModifier import modifySLtoCost
 from strikes import getNiftyStopLoss,getExpirySL
 from Common import readContentsofFile,isExpiryTrades,isBNExpiryDay,format_option_symbol

@@ -21,7 +21,7 @@ from ShoonyaTrade import placeStraddleOrders,placeStraddleStopOders,watchStraddl
 from Common import isExpiryDay,writeToTheFileWithContent,bankNiftyAcceptedDifference,getBankNiftyFutureScrip,getBankNiftySpotScrip,getIndiaVixScrip
 import os,sys
 import numpy as np
-from Shoonya import createShoonyaSession 
+from ShoonyaSession import createShoonyaSession 
 
 
 

@@ -15,7 +15,7 @@ from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
 
 from SendNotifications import sendNotifications
 from SAS import createSession
-from Shoonya import createShoonyaSession,getConnectionObject 
+from ShoonyaSession import createShoonyaSession,getConnectionObject 
 
 import re
 import os
