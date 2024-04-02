@@ -5,19 +5,21 @@ Created on Thu Sep  9 12:36:08 2021
 @author: Dhakshu
 """
 
-from Orders import placeMarketOrders,placeStopLossMarketorder,getOrderHistory,getTradedPriceOfOrder,modifyOrder,placeStopLossLimitOrder,getDaywisePositions,SellOrder,StrikeType,IndexType,cancelOrder
-#from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
-from alice_blue import LiveFeedType,TransactionType,OrderType,ProductType
-
+from Orders import placeStopLossMarketorder,StrikeType,IndexType
+from ShoonyaOrders import SellOrder,getDaywisePositions,cancelOrder
+from ShoonyaOrders import placeMarketOrders,placeStopLossLimitOrder,getOrderHistory,modifyOrder,placeMOWithoutConversion
+from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
+from ShoonyaOrders import getTradedPriceOfOrder
 from SendNotifications import sendNotifications
 from time import sleep
 from datetime import date,time,timedelta
 import datetime
 import logging
 from SAS import createSession,reConnectSession
+from Shoonya import createShoonyaSession
 from AVSLModifier import modifySLtoCost
 from strikes import getNiftyStopLoss,getExpirySL
-from Common import isExpiryDay,readContentsofFile,isExpiryTrades
+from Common import readContentsofFile,isExpiryTrades,isBNExpiryDay,format_option_symbol
 import os
 
 preClosingSLModified = False 
@@ -26,10 +28,11 @@ BNPutSL = 0.0
 instruments = []
 
 
-def placeStraddleOrders(sas,orders):
+def placeStraddleOrders(sas,shoonya,orders):
 
     for order in orders:
-        order.orderID =  placeMarketOrders(sas,TransactionType.Sell,order.quantity,order.instrument)
+        order.orderID =  placeMarketOrders(shoonya,TransactionType.Sell,order.quantity,order.instrument)
+        order.shoonyaToken = format_option_symbol(order.instrument['tradingSymbol'])
     
     for order in orders:    
        sendNotifications(f'Sold with {order.orderID }')  
@@ -50,10 +53,13 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,SLCorrection=False
     putSL = stoploss 
     BNCallSL = stoploss
     BNPutSL = stoploss
-    
+    sendNotifications('placeStraddleStopOders')
+    sendNotifications(type(orders))
+
     try:
-        for order in orders: 
-            order.tradedPrice = getTradedPriceOfOrder(sas,order.orderID)
+        for order in orders:
+            sendNotifications('begining')
+            order.tradedPrice = getTradedPriceOfOrder(order.orderID)
             sendNotifications(f'traded price of {order.strike} {order.strikeType} is {order.tradedPrice}')                       
             sleep(1)
             if order.tradedPrice == 0.0:
@@ -119,10 +125,19 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,SLCorrection=False
                         modifiedSL = callSL
                     elif order.strikeType == StrikeType.PUT:
                         modifiedSL = putSL
+                elif SLCorrection == True and stratergy == 'MorningBNStraddle':
+                    if order.strikeType == StrikeType.CALL:
+                        modifiedSL = callSL
+                    elif order.strikeType == StrikeType.PUT:
+                        modifiedSL = putSL
+                    order.stoplossPrice = float(order.tradedPrice) + (float(order.tradedPrice) * modifiedSL)   
+                    sendNotifications("BN modified SL") 
+                    sendNotifications(f'Modified SL {modifiedSL}')
                 else:
                     modifiedSL = stoploss
-                sendNotifications(f'Modified SL {modifiedSL}')
-                order.stoplossPrice = float(order.tradedPrice) + (float(order.tradedPrice) * modifiedSL)
+                    order.stoplossPrice = float(order.tradedPrice) + (float(order.tradedPrice) * modifiedSL)
+                    sendNotifications(f'Modified SL {modifiedSL}')
+
                 sendNotifications(f'SL {order.strike} {order.strikeType}price {order.stoplossPrice}')
 
             order.stoporderID = placeStopLossLimitOrder(sas,TransactionType.Buy,order.quantity,order.instrument,round(order.stoplossPrice, 1),order)
@@ -130,7 +145,7 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,SLCorrection=False
     except Exception as e:
         sendNotifications(e)
         sendNotifications("Unauthorised exception.. go for conn again placeStraddleStopOders")
-        sas = reConnectSession('r**a')
+        shoonya = createShoonyaSession()
         sleep(60)  
         sendNotifications("Hopefully reconnected and going for stops")
         placeStraddleStopOders(sas,orders,stoploss,stratergy,SLCorrection)      
@@ -156,7 +171,7 @@ def watchTrigger(sas,orders):
         for index,order in enumerate(triggerPendingOrders):
             sleep(1)
             order.orderStatus = getOrderHistory(sas,order.orderID,False)
-            if order.orderStatus == 'complete':
+            if order.orderStatus.lower() == 'complete':
                 sendNotifications(f'{order.strike} {order.strikeType} triggered and placing 0.3 stop') 
                 preparedOrders = []
                 preparedOrders.append(order)
@@ -165,7 +180,7 @@ def watchTrigger(sas,orders):
         triggerPendingOrders = list(filter(lambda order:order.orderStatus != 'complete',orders))
         pass 
 
-def watchStraddleStopOrders(sas,orders,tradeActive,stratergy=None,SLModification = False):
+def watchStraddleStopOrders(sas,shoonya,orders,tradeActive,stratergy=None,SLModification = False):
     global preClosingSLModified
     modifiedstatus = False
     sendNotifications(f'Watching stoporders {stratergy}')
@@ -178,11 +193,11 @@ def watchStraddleStopOrders(sas,orders,tradeActive,stratergy=None,SLModification
 
         
         #To Modify SL at 2:30 PM to cost
-        if datetime.datetime.now().time() >= time(14,10) and preClosingSLModified == False:
-            sendNotifications(f'going to modify SLs {stratergy}')
-            preClosingSLModified = True
-            modifySLtoCost(sas,filteredOrders,stratergy)
-            sendNotifications(f'SL modification completed {stratergy}')
+        #if datetime.datetime.now().time() >= time(14,10) and preClosingSLModified == False:
+        #    sendNotifications(f'going to modify SLs {stratergy}')
+        #    preClosingSLModified = True
+        #    modifySLtoCost(sas,filteredOrders,stratergy)
+        #    sendNotifications(f'SL modification completed {stratergy}')
         try:
             for order in filteredOrders:
                 
@@ -192,7 +207,7 @@ def watchStraddleStopOrders(sas,orders,tradeActive,stratergy=None,SLModification
                     if resp['instrument_token'] == order.instrumentToken:
                         order.ltp = resp['last_traded_price'] * .01
                 
-                if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
+                if order.ltp < 10.0 and isBNExpiryDay() == True and not order.positionClosed:
                     checkForMinimumValueAndClose(sas,order,orders)
                     
                 if (order.ltp > order.stoplossPrice and not order.positionClosed):
@@ -204,7 +219,7 @@ def watchStraddleStopOrders(sas,orders,tradeActive,stratergy=None,SLModification
                             sendNotifications(f'possible call slippage {stratergy}')
                         else:
                             sendNotifications(f'possible Put slippage {stratergy}')
-                        if  order.orderStatus == 'complete':
+                        if  order.orderStatus.lower() == 'complete':
                             order.positionClosed = True
                             if order.strikeType == StrikeType.CALL:
                                 sendNotifications(f'call order completed no slippage {stratergy}')
@@ -234,14 +249,14 @@ def watchStraddleStopOrders(sas,orders,tradeActive,stratergy=None,SLModification
                                                  sendNotifications(f'call SL not modifed {stratergy}')   
                            # sas.unsubscribe(order.instrument, LiveFeedType.COMPACT)
                             
-                    if order.orderStatus == 'trigger pending' or order.orderStatus == 'open' :
+                    if order.orderStatus.lower() == 'trigger_pending' or order.orderStatus.lower() == 'open' :
                        newStopPrice = 0.0
                        sendNotifications(f"possible freak trade {stratergy},watch it. Status is pending")
                        sleep(15)
                        sendNotifications(f"Going for trade after 15 secs {stratergy}")
                        if order.ltp > order.stoplossPrice:
                            order.orderStatus = getOrderHistory(sas,order.stoporderID)
-                           if ( order.orderStatus == 'trigger pending' or order.orderStatus == 'open'):
+                           if ( order.orderStatus.lower() == 'trigger_pending' or order.orderStatus.lower() == 'open'):
                                newStopPrice = order.ltp
                                modifiedstatus = modifyOrder(sas,TransactionType.Buy,order.instrument,order.stoporderID,order.ltp,order.quantity)
                            else:
@@ -309,7 +324,7 @@ def watchExpiryStraddleStopOrders(sas,orders,tradeActive,stratergy=None,SLMove=F
                             sendNotifications(f'possible call {order.strike}  slippage {stratergy}')
                         else:
                             sendNotifications(f'possible Put {order.strike} slippage {stratergy}')
-                        if  order.orderStatus == 'complete':
+                        if  order.orderStatus.lower() == 'complete':
                             order.positionClosed = True
                             if order.strikeType == StrikeType.CALL:
                                 sendNotifications(f'call order completed no slippage {stratergy}')
@@ -338,14 +353,14 @@ def watchExpiryStraddleStopOrders(sas,orders,tradeActive,stratergy=None,SLMove=F
                                              sendNotifications(f'call SL not modifed {stratergy}')
                             sas.unsubscribe(order.instrument, LiveFeedType.COMPACT)
                             
-                    if order.orderStatus == 'trigger pending' or order.orderStatus == 'open' :
+                    if order.orderStatus.lower() == 'trigger_pending' or order.orderStatus.lower() == 'open' :
                        newStopPrice = 0.0
                        sendNotifications(f"possible freak trade {stratergy},watch it. Status is pending")
                        sleep(15)
                        sendNotifications(f"Going for trade after 15 secs {stratergy}")
                        if order.ltp > order.stoplossPrice:
                            order.orderStatus = getOrderHistory(sas,order.stoporderID)
-                           if (order.orderStatus == 'trigger pending' or order.orderStatus == 'open'):
+                           if (order.orderStatus.lower() == 'trigger_pending' or order.orderStatus.lower() == 'open'):
                                newStopPrice = order.ltp
                                modifiedstatus = modifyOrder(sas,TransactionType.Buy,order.instrument,order.stoporderID,order.ltp,order.quantity)
                            else:
@@ -355,7 +370,7 @@ def watchExpiryStraddleStopOrders(sas,orders,tradeActive,stratergy=None,SLMove=F
                            sendNotifications(f'SL order modified {newStopPrice} {stratergy}')
                        else:
                            sendNotifications(f'SL Modification failed {stratergy}')
-                    elif order.orderStatus == 'cancelled':
+                    elif order.orderStatus.lower() == 'cancelled':
                         sendNotifications(f"possible freak trade,watch it and Order got cancelled {stratergy}")
                         sleep(15)
                         sendNotifications(f"Going for trade after 15 secs {stratergy}")
@@ -403,7 +418,7 @@ def watchStraddleStopOrdersWithHedge(sas,orders,tradeActive,stratergy=None):
                                 squareOff(sas,order.hedgeInstrument)
                                 sleep(3)
                                 order.hedgeStatus = getOrderHistory(sas,order.hedgeOrderId)
-                                if  order.hedgeStatus == 'complete':
+                                if  order.hedgeStatus.lower() == 'complete':
                                     order.positionClosed = True
                                     sendNotifications('call hedge closed')
                                 else:
@@ -414,7 +429,7 @@ def watchStraddleStopOrdersWithHedge(sas,orders,tradeActive,stratergy=None):
                                 squareOff(sas,order.hedgeInstrument)
                                 sleep(3)
                                 order.hedgeStatus = getOrderHistory(sas,order.hedgeOrderId)
-                                if  order.hedgeStatus == 'complete':
+                                if  order.hedgeStatus.lower() == 'complete':
                                     order.positionClosed = True
                                     sendNotifications('put hedge closed')
                                 else:
@@ -422,14 +437,14 @@ def watchStraddleStopOrdersWithHedge(sas,orders,tradeActive,stratergy=None):
                                     sendNotifications('Check hedge order')  
                             sas.unsubscribe(order.instrument, LiveFeedType.COMPACT)
                             
-                    if order.orderStatus == 'trigger pending' or order.orderStatus == 'open' :
+                    if order.orderStatus.lower() == 'trigger_pending' or order.orderStatus.lower() == 'open' :
                        newStopPrice = 0.0
                        sendNotifications("possible freak trade,watch it. Status is pending")
                        sleep(15)
                        sendNotifications("Going for trade after 15 secs")
                        if order.ltp > order.stoplossPrice:
                            order.orderStatus = getOrderHistory(sas,order.stoporderID)
-                           if (order.orderStatus == 'trigger pending' or order.orderStatus == 'open'):
+                           if (order.orderStatus.lower() == 'trigger_pending' or order.orderStatus.lower() == 'open'):
                                newStopPrice = order.ltp
                                modifiedstatus = modifyOrder(sas,TransactionType.Buy,order.instrument,order.stoporderID,order.ltp,order.quantity)
                            else:
@@ -439,7 +454,7 @@ def watchStraddleStopOrdersWithHedge(sas,orders,tradeActive,stratergy=None):
                            sendNotifications(f'SL order modified {newStopPrice}')
                        else:
                            sendNotifications('SL Modification failed')
-                    elif order.orderStatus == 'cancelled':
+                    elif order.orderStatus.lower() == 'cancelled':
                         sendNotifications("possible freak trade,watch it and Order got cancelled")
                         sleep(15)
                         sendNotifications("Going for trade after 15 secs")
@@ -466,7 +481,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
     
     modifiedstatus = False
     global preClosingSLModified
-    sendNotifications(f'Watching stoporders {stratergy}')
+    sendNotifications(f'Watching stoporders {stratergy} with rentry')
     while tradeActive:
         sleep(14)
         filteredOrders = list(filter(lambda order:order.positionClosed == False,orders))
@@ -479,39 +494,39 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
 
         for index,order in enumerate(triggerPendingOrders):
             sleep(1)
-
+            print(order)
             order.orderStatus = getOrderHistory(sas,order.orderID,False)
-            if order.orderStatus == 'complete':
-                sendNotifications(f'{order.strike} {order.strikeType} 930Nifty reentered and placing 0.2 stop') 
+            if order.orderStatus.lower() == 'complete':
+                sendNotifications(f'{order.strike} {order.strikeType} {stratergy} reentered ') 
                 preparedOrders = []
                 preparedOrders.append(order)
+                sendNotifications(f'preparedOrders {preparedOrders}')
                 order.positionClosed = False
-                if (stratergy == 'AVBNExpiryTripplestraddles'):
+                if (stratergy == 'MorningBNStraddle'):
+                    sendNotifications('in if')
                     if order.strikeType == StrikeType.CALL:
-                        placeStraddleStopOders(sas,preparedOrders,BNCallSL,'ExpiryBN call reordered SL added')
+                        placeStraddleStopOders(sas,preparedOrders,BNCallSL,'BN call reordered SL added')
                     elif order.strikeType == StrikeType.PUT:
-                        placeStraddleStopOders(sas,preparedOrders,BNPutSL,'ExpiryBN reordered SL added')
+                        placeStraddleStopOders(sas,preparedOrders,BNPutSL,'BN Put reordered SL added')
                 else:
+                    sendNotifications('in else')
                     placeStraddleStopOders(sas,preparedOrders,0.25,'930Nifty reordered SL added')
         
         #To Modify SL at 2:30 PM to cost
-        if datetime.datetime.now().time() >= time(14,10) and preClosingSLModified == False:
-            sendNotifications(f'going to modify SLs {stratergy}')
-            preClosingSLModified = True
-            modifySLtoCost(sas,filteredOrders,stratergy)
-            sendNotifications(f'SL modification completed {stratergy}')
+        #if datetime.datetime.now().time() >= time(14,10) and preClosingSLModified == False:
+        #    sendNotifications(f'going to modify SLs {stratergy}')
+        #    preClosingSLModified = True
+        #    modifySLtoCost(sas,filteredOrders,stratergy)
+        #    sendNotifications(f'SL modification completed {stratergy}')
         try:
             for order in filteredOrders:
                 
                 for resp in list(response.values()):
-                    print(resp)
-                    print('=======')
                     if resp['instrument_token'] == order.instrumentToken:
                         order.ltp = resp['last_traded_price'] * .01
-                        print(order.ltp)
                 
-                if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
-                    checkForMinimumValueAndClose(sas,order,orders)
+                #if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
+                #    checkForMinimumValueAndClose(sas,order,orders)
                     
                 if (order.ltp > order.stoplossPrice and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
@@ -522,7 +537,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                             sendNotifications(f'possible call slippage {stratergy}')
                         else:
                             sendNotifications(f'possible Put slippage {stratergy}')
-                        if  order.orderStatus == 'complete':
+                        if  order.orderStatus.lower() == 'complete':
                             order.positionClosed = True
                             if order.strikeType == StrikeType.CALL:
                                 sendNotifications(f'call order completed no slippage {stratergy}')
@@ -539,14 +554,14 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                                     sendNotifications(f'put reordered {order.orderID}') 
                             #sas.unsubscribe(order.instrument, LiveFeedType.COMPACT)
                             
-                    if order.orderStatus == 'trigger pending' or order.orderStatus == 'open' :
+                    if order.orderStatus.lower() == 'trigger_pending' or order.orderStatus.lower() == 'open' :
                        newStopPrice = 0.0
                        sendNotifications(f"possible freak trade {stratergy},watch it. Status is pending")
                        sleep(15)
                        sendNotifications(f"Going for trade after 15 secs {stratergy}")
                        if order.ltp > order.stoplossPrice:
                            order.orderStatus = getOrderHistory(sas,order.stoporderID)
-                           if ( order.orderStatus == 'trigger pending' or order.orderStatus == 'open'):
+                           if ( order.orderStatus.lower() == 'trigger_pending' or order.orderStatus.lower() == 'open'):
                                newStopPrice = order.ltp
                                modifiedstatus = modifyOrder(sas,TransactionType.Buy,order.instrument,order.stoporderID,order.ltp,order.quantity)
                            else:
@@ -556,7 +571,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                            sendNotifications(f'SL order {order.strike} modified {newStopPrice} {stratergy}')
                        else:
                            sendNotifications(f'SL Modification failed {stratergy}')
-                    elif order.orderStatus == 'cancelled':
+                    elif order.orderStatus.lower() == 'cancelled':
                         sendNotifications(f"possible freak trade {stratergy},watch it and Order got cancelled")
                         sleep(15)
                         sendNotifications(f"Going for trade after 15 secs {stratergy}")
@@ -595,7 +610,7 @@ def squareOff(sas,inst):
         sendNotifications(f'square off Inst {inst}')
         positions = getDaywisePositions(sas)
         for position in positions:
-            if int(position['instrument_token']) == inst['instrumentToken']:
+            if int(position['tsym']) == format_option_symbol(inst['tradingSymbol']):
                 sendNotifications('token matched')
                 sqaureOffPosition(sas,position) 
                 break
@@ -603,7 +618,6 @@ def squareOff(sas,inst):
     except Exception as e:
        sendNotifications(e)
        sendNotifications("squareOff")
-       sas = reConnectSession('r**a')
        sleep(60) 
        sendNotifications("Hopefully reconnected and going for squareOff")
        squareOff(sas,inst)
@@ -612,16 +626,16 @@ def sqaureOffPosition(sas,position):
     try:
        quantity = 0
        sqaureoffTransactionType = ''
-       if (position['net_quantity'] != 0) and (position['product'] == 'MIS'):
+       if (position['netqty'] != 0) and (position['s_prdt_ali'] == 'MIS'):
            sendNotifications('Identified open postion')
-           instrument = {'exchangeCode': 2, 'instrumentToken': position['instrument_token']}
-           if position['net_quantity'] < 0:
+           instrument = {'exchangeCode': 2,'tradingSymbol':position['tsym']}
+           if position['netqty'] < 0:
                sqaureoffTransactionType= TransactionType.Buy
-               quantity = position['net_quantity'] * -1
+               quantity = position['netqty'] * -1
            else:
                sqaureoffTransactionType= TransactionType.Sell
-               quantity = position['net_quantity']
-           orderid = placeMarketOrders(sas,sqaureoffTransactionType,quantity,instrument)
+               quantity = position['netqty']
+           orderid = placeMOWithoutConversion(sas,sqaureoffTransactionType,quantity,instrument)
            print(f'squared off order id {orderid}')
            sendNotifications(f'squared off order id {orderid}')
        else:
@@ -629,7 +643,6 @@ def sqaureOffPosition(sas,position):
     except Exception as e:
        sendNotifications(e)
        sendNotifications("sqaureOffPosition")
-       sas = reConnectSession('r**a')
        sleep(60) 
        sendNotifications("Hopefully reconnected and going for sqaureOffPosition")
        sqaureOffPosition(sas,position)   

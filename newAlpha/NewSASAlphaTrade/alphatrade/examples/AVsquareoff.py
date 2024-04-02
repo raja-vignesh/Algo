@@ -8,31 +8,33 @@ Created on Tue Aug 24 16:16:15 2021
 from time import sleep
 from datetime import date,time,timedelta
 import datetime
-from Orders import placeMarketOrders,placeStopLossMarketorder,getOrderHistory,getTradedPriceOfOrder,getDaywisePositions,getPendingOrders,cancelOrder
+from Orders import placeMarketOrders,placeStopLossMarketorder,getOrderHistory,getTradedPriceOfOrder,getPendingOrders,cancelOrder
+from ShoonyaOrders import getDaywisePositions,placeMOWithoutConversion
 from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
 #from alice_blue import LiveFeedType,TransactionType,OrderType,ProductType
 
 from SendNotifications import sendNotifications
 from SAS import createSession
+from Shoonya import createShoonyaSession,getConnectionObject 
+
 import re
 import os
-sas = None
-
+connection = None 
+shoonya= None
 def main():
-    global sas
-    while sas is None:
-        sas = createSession("r**a")
-        if sas == None:
-            sleep(120)
-            pass
-        
-    while datetime.datetime.now().time() <= time(15,15):
-        sleep(60)
-        pass
+    global shoonya
+    while shoonya is None:
+        shoonya = createShoonyaSession() 
+        if shoonya == None:
+             sleep(90)
+             pass
     squareOff()
     
     
 def squareOff():
+    global connection
+    sas = None
+    connection = getConnectionObject()
     positions = getDaywisePositions(sas)
     squaredOffIDs = []
     for position in positions:
@@ -42,51 +44,54 @@ def squareOff():
         if offid is not None:
             sendNotifications(f'Squared off with id {offid}')
     cancelPendingOrders()
-    calculateMTM()
+    calculateMTM(positions)
     
 def sqaureOffPosition(position):
-   quantity = 0
-   sqaureoffTransactionType = ''
-   if (position['net_quantity'] != 0) and (position['product'] == 'MIS'):
-       instrument = {'exchangeCode': 2, 'instrumentToken': position['instrument_token']}
-       if position['net_quantity'] < 0:
-           sqaureoffTransactionType= TransactionType.Buy
-           quantity = position['net_quantity'] * -1
+    try:
+       quantity = 0
+       sqaureoffTransactionType = ''
+       netQuantity = int(position['netqty'])
+       if (netQuantity != 0) and (position['s_prdt_ali'] == 'MIS'):
+           sendNotifications('Identified open postion')
+           instrument = {'exchangeCode': 2, 'tradingSymbol':position['tsym']}
+           if netQuantity < 0:
+               sqaureoffTransactionType= TransactionType.Buy
+               quantity = netQuantity * -1
+           else:
+               sqaureoffTransactionType= TransactionType.Sell
+               quantity = netQuantity
+           orderid = placeMOWithoutConversion(sas,sqaureoffTransactionType,quantity,instrument)
+           print(f'squared off order id {orderid}')
+           sendNotifications(f'squared off order id {orderid}')
        else:
-           sqaureoffTransactionType= TransactionType.Sell
-           quantity = position['net_quantity']
-       orderid = placeMarketOrders(sas,sqaureoffTransactionType,quantity,instrument)
-       return orderid
+           sendNotifications('No position to squareoff')
+    except Exception as e:
+       sendNotifications(e)
+       sendNotifications("sqaureOffPosition again")
+       sleep(30) 
+       sqaureOffPosition(sas,position)   
     
 def cancelPendingOrders():
-
-    pendingOrders = getPendingOrders(sas)
-    for order in pendingOrders:
-        orderId = order['oms_order_id']
-        if orderId != ' ':
-            cancelOrder(orderId)
-    sendNotifications('Pending orders cancelled ' + str(datetime.datetime.now()))
+    global connection
+    connection = getConnectionObject()
+    orders = connection.get_order_book()
+    for order in orders:
+        if order['status'].lower() == 'trigger_pending' or order['status'].lower() == 'pending':
+            connection.cancel_order(orderno=order['norenordno'])
+            sendNotifications('Pendin orders cancelled ' + str(datetime.datetime.now()))
     
-def canceThePendingOrder(ordertobecancelled):
-    pendingOrders = getPendingOrders(sas)
-    for order in pendingOrders:
-        orderId = order['oms_order_id']
-        if orderId == ordertobecancelled:
-            cancelOrder(orderId)
-            break
-    sendNotifications('Pending order cancelled ' + str(datetime.datetime.now()))
-    
+    sendNotifications('pending orders cancelled')
 
-def calculateMTM():
+def calculateMTM(positions):
     global sas
     
-    positions = getDaywisePositions(sas)
     mtm = 0.0
     openPositions = 0
     for position in positions:
-        if (position['net_quantity'] == 0) and (position['product'] == 'MIS'):
-            mtm =  mtm + float(position['realized_mtm'])    
-        elif (position['net_quantity'] != 0) and (position['product'] == 'MIS'):
+        netQuantity = int(position['netqty'])
+        if (netQuantity == 0) and (position['s_prdt_ali'] == 'MIS'):
+            mtm =  mtm + float(position['rpnl'])    
+        elif (netQuantity != 0) and (position['s_prdt_ali'] == 'MIS'):
             openPositions = openPositions + 1
     sendNotifications(f'P/L for the day is {mtm}')
     if openPositions > 0:

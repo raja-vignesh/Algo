@@ -312,8 +312,8 @@ def getOptionInstrumentandPrices(sas,instrument,price,chainLength = 6):
         print(response)
         for strike in strikes:
             #strikePrices.append(abs(float(strike['call_option']['close_price']) - float(strike['put_option']['close_price'])))
-            strikeInstruments.append({'exchangeCode': 2, 'instrumentToken':  int(strike['call_option']['token'])})
-            strikeInstruments.append({'exchangeCode': 2, 'instrumentToken':  int(strike['put_option']['token'])})
+            strikeInstruments.append({'exchangeCode': 2, 'instrumentToken':  int(strike['call_option']['token']),'tradingSymbol':strike['call_option']['trading_symbol']})
+            strikeInstruments.append({'exchangeCode': 2, 'instrumentToken':  int(strike['put_option']['token']),'tradingSymbol':strike['put_option']['trading_symbol']})
             strikePrices.append(strike['strike_price'])
         
         return (strikeInstruments,strikePrices) 

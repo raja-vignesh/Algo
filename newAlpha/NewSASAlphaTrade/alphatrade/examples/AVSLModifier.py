@@ -6,7 +6,7 @@ Created on Thu Oct 21 14:47:55 2021
 """
 
 from Orders import placeMarketOrders,placeStopLossMarketorder,getOrderHistory,getTradedPriceOfOrder,modifyOrder,placeStopLossLimitOrder,getDaywisePositions,SellOrder,StrikeType
-from alice_blue import LiveFeedType,TransactionType,OrderType,ProductType
+from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
 from SendNotifications import sendNotifications
 from SAS import createSession,reConnectSession
 from time import sleep
