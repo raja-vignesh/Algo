@@ -8,7 +8,7 @@ Created on Sun Aug 22 21:53:34 2021
 from alphatrade import ProductType,OrderType,TransactionType
 from SendNotifications import sendNotifications
 import enum
-from ShoonyaSession import getConnectionObject,reGenerateToken
+from ShoonyaSession import getConnectionObject,reGenerateToken,validateSession
 from time import sleep
 from Common import format_option_symbol,convert_transaction_type
 
@@ -278,7 +278,8 @@ def placeMarketOrders(shoonya,transactionType,quantity,instrument,product_type =
         return response['norenordno']
       else:
         sendNotifications(response["emsg"])
-        #placeMarketOrders(shoonya,transactionType,quantity,instrument,product_type = ProductType.Intraday)
+        connection = validateSession()
+        placeMarketOrders(shoonya,transactionType,quantity,instrument,product_type = ProductType.Intraday)
   except ValueError:
       if response['error_code'] == 40010:
           #reGenerateToken()
@@ -310,7 +311,8 @@ def placeMOWithoutConversion(shoonya,transactionType,quantity,instrument,product
         return response['norenordno']
       else:
         sendNotifications(response["emsg"])
-        #placeMarketOrders(shoonya,transactionType,quantity,instrument,product_type = ProductType.Intraday)
+        connection = validateSession()
+        placeMarketOrders(shoonya,transactionType,quantity,instrument,product_type = ProductType.Intraday)
   except ValueError:
       if response['error_code'] == 40010:
           #reGenerateToken()
@@ -388,7 +390,8 @@ def placeStopLossLimitOrder(sas,transactionType,quantity,instrument,price,order,
             return response['norenordno']
        else:
             sendNotifications(response["emsg"])
-            #placeStopLossLimitOrder(sas,transactionType,quantity,instrument,price,order,product_type = ProductType.Intraday)
+            connection = validateSession()
+            placeStopLossLimitOrder(sas,transactionType,quantity,instrument,price,order,product_type = ProductType.Intraday)
 
     except ValueError:
         if response['error_code'] == 40010:
@@ -450,6 +453,7 @@ def getOrderHistory(sas,orderId,printLog=True):
            sendNotifications(f'status is {status}')
        return status
     except ValueError:
+        connection = validateSession()
         getOrderHistory(sas,orderId)
     except Exception as e:
         sendNotifications(f'getOrderHistory - {e}')
@@ -476,12 +480,8 @@ def getTradedPriceOfOrder(orderId):
                     sendNotifications('Key error so setting 0')
             return price 
     except ValueError:
-        if response['error_code'] == 40010:
-            reGenerateToken()
-            getTradedPriceOfOrder(shoonya,orderId)
-        elif response['error_code'] == 40000:
-            #getProfileToActivateconnection()
-            getTradedPriceOfOrder(shoonya,orderId)
+        connection = validateSession()
+        getTradedPriceOfOrder(orderId)
     except Exception as e:
         sendNotifications(f'getTradedPriceOfOrder - {e}')
 
@@ -493,6 +493,7 @@ def getDaywisePositions(sas):
         response = connection.get_positions()
         return response
     except ValueError:
+            connection = validateSession()
             getDaywisePositions(sas)
     except Exception as e:
         sendNotifications(f'getDaywisePositions - {e}')

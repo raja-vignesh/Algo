@@ -536,11 +536,11 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
 
         
         #To Modify SL at 2:30 PM to cost
-        if datetime.datetime.now().time() >= time(14,30) and preClosingSLModified == False:
-            sendNotifications(f'going to modify SLs {stratergy}')
-            preClosingSLModified = True
-            modifySLtoCost(sas,filteredOrders,stratergy)
-            sendNotifications(f'SL modification completed {stratergy}')
+        #if datetime.datetime.now().time() >= time(14,30) and preClosingSLModified == False:
+            #sendNotifications(f'going to modify SLs {stratergy}')
+            #preClosingSLModified = True
+            #modifySLtoCost(sas,filteredOrders,stratergy)
+            #sendNotifications(f'SL modification completed {stratergy}')
         if datetime.datetime.now().time() >= time(15,15):
             sendNotifications(f'bye bye {stratergy} its 315')
             break

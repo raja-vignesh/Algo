@@ -16,7 +16,7 @@ from datetime import date,time,timedelta
 import datetime
 import logging
 from SAS import createSession,reConnectSession
-from ShoonyaSession import createShoonyaSession
+from ShoonyaSession import createShoonyaSession,validateSession
 from AVSLModifier import modifySLtoCost
 from strikes import getNiftyStopLoss,getExpirySL
 from Common import readContentsofFile,isExpiryTrades,isBNExpiryDay,format_option_symbol
@@ -145,8 +145,8 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,SLCorrection=False
     except Exception as e:
         sendNotifications(e)
         sendNotifications("Unauthorised exception.. go for conn again placeStraddleStopOders")
-        shoonya = createShoonyaSession()
-        sleep(60)  
+        shoonya = validateSession()
+        sleep(10)  
         sendNotifications("Hopefully reconnected and going for stops")
         placeStraddleStopOders(sas,orders,stoploss,stratergy,SLCorrection)      
     subscribeToPrices(sas,orders)
@@ -585,7 +585,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
             #if e.message == 'Request Unauthorised':
                 sendNotifications(e)
                 sendNotifications(f"Unauthorised exception.. go for conn again {stratergy}")
-                sas = reConnectSession('r**a')
+                sas = reConnectSession()
                 sleep(60)
                 
         if len(filteredOrders) == 0:

@@ -3,7 +3,6 @@ import pyotp
 from SendNotifications import sendNotifications
 from time import sleep
 import keyring
-
 shoonya = None
 
 class ShoonyaApiPy(NorenApi):
@@ -14,7 +13,7 @@ class ShoonyaApiPy(NorenApi):
 
 def createShoonyaToken():
     global shoonya
-    
+    shoonya = None
     while shoonya is None:
         try:
             shoonya = ShoonyaApiPy()
@@ -42,7 +41,7 @@ def createShoonyaToken():
         except Exception as e: 
             sendNotifications('login failed.. retrying in 2 mins')
             sleep(120)  # Retry after 2 minutes
-
+        pass
 
 
 

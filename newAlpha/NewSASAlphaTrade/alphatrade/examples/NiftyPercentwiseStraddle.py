@@ -113,7 +113,6 @@ def open_socket():
     sas.unsubscribe_multiple_compact_marketdata(instruments) 
     niftyLTP = (NiftyFut + NiftySpot)/2.0
     sendNotifications(niftyLTP)
-    sendNotifications('unsubscribed')
     sleep(1)
     setRefenceValues()
     sleep(3)
@@ -206,16 +205,11 @@ def createOrder():
         sendNotifications(" Nifty price is :: " + str(current_ltp))
         
         ## Added for ATM from OC##
-   
+        sendNotifications('Calculating ATM using OC')
+
         try: 
             while atmPremiumDifference > benchmarkDifference:
-                sendNotifications('Calculating ATM using OC')
                 NiftyAvgPrice = round((NiftySpot + NiftyFut) / 2.0,2)
-                sendNotifications(f'Nifty avg price is {NiftyAvgPrice}')
-                sendNotifications(atmPremiumDifference)
-                sendNotifications(benchmarkDifference)
-                sendNotifications(NiftySpot)
-                sendNotifications(NiftyFut) 
                 options = getOptionInstrumentandPrices(sas,Nifty_FutScrip,NiftyAvgPrice)
                 
                 instruments = options[0]

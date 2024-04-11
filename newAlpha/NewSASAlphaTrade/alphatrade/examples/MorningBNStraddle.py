@@ -124,11 +124,10 @@ def open_socket():
                    
                            
                     ## Added for ATM from OC##
-               
+                    sendNotifications('Calculating ATM using OC')
+
                     try: 
-                        sendNotifications('Calculating ATM using OC')
                         BNAvgPrice = round((BNSpot + BNFut) / 2.0,2)
-                        sendNotifications(f'BN avg price is {BNAvgPrice}')
                         options = getOptionInstrumentandPrices(sas,BankNiftyFut_scrip,BNAvgPrice)
                         
                         instruments = options[0]

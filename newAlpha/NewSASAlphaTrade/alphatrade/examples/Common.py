@@ -57,6 +57,13 @@ def isPreExpiryDay():
        return True
    else:
        return False
+
+def isBNPreExpiryDay():
+   day = datetime.date.today().weekday()
+   if day == 1:
+       return True
+   else:
+       return False
    
 def isBNBuyingDay():
    day = datetime.date.today().weekday()
@@ -113,7 +120,7 @@ def readContentsofFile(fileName):
             return txt
         
 def bankNiftyAcceptedDifference():
-    return 50.0
+    return 27.0
 
 def niftyAcceptedDifference():
     return 8.0

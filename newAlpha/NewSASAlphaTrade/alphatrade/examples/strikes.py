@@ -9,7 +9,7 @@ from time import sleep
 from datetime import date,time,timedelta
 import datetime
 from Orders import StrikeType
-from Common import isExpiryDay,isPreExpiryDay,readVixValue
+from Common import isExpiryDay,isPreExpiryDay,readVixValue,isBNExpiryDay,isBNPreExpiryDay
 from SAS import getConnectionObject
 from SendNotifications import sendNotifications
 
@@ -179,7 +179,7 @@ def getNifty927Stoploss():
 
 def getBN920Stoploss():
     day = datetime.date.today().weekday()
-    if isExpiryDay() == True or isPreExpiryDay() == True:
+    if isBNPreExpiryDay() == True or isBNExpiryDay() == True:
         return .3
     elif day == 1:
         return .27

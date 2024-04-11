@@ -14,7 +14,7 @@ class ShoonyaApiPy(NorenApi):
 
 def createShoonyaSession():
     global shoonya
-
+    shoonya = None
     while shoonya is None:
         try:
             shoonya = ShoonyaApiPy()
@@ -27,12 +27,13 @@ def createShoonyaSession():
 
             shoonya.set_session(user,pwd,keyring.get_password('shoonya', 'token'))
 
-
         except Exception as e: 
-            sendNotifications('login failed.. retrying in 2 mins')
-            sleep(120)  # Retry after 2 minutes
-    
-    sendNotifications('returned session')
+            sendNotifications('login failed.. creating shoonya token')
+            createShoonyaToken()
+            shoonya = None
+            sendNotifications('retrying shoonya session')
+            sleep(30)  # Retry after 2 minutes
+        pass
     return shoonya
 
 def getConnectionObject():

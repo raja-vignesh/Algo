@@ -194,17 +194,13 @@ def open_socket():
                     niftyLTP = (NiftySpot + NiftyFut)/2.0
     
             ## Added for ATM from OC##
-       
+            sendNotifications('Calculating ATM using Nifty')
+
             try:
                while atmPremiumDifference > benchmarkDifference:
                     sleep(3)      
-                    sendNotifications('Calculating ATM using Nifty')
                     niftyAvgPrice = (NiftySpot + NiftyFut)/2.0
 
-                    sendNotifications(atmPremiumDifference)
-                    sendNotifications(benchmarkDifference)
-                    sendNotifications(NiftySpot)
-                    sendNotifications(NiftyFut) 
                     options = getOptionInstrumentandPrices(sas,Nifty_FutScrip,niftyAvgPrice)
                     sendNotifications(f'nifty avg price is {niftyAvgPrice}')
                     instruments = options[0]
