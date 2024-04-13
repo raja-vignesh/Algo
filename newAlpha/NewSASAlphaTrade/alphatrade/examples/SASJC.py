@@ -66,7 +66,7 @@ def generateJCToken():
         
         
         
-        totp = pyotp.TOTP("SKN7KXQQN76YLNEH")
+        totp = pyotp.TOTP("ENOK5SUIOFDZLELO")
         
         otpElement = browser.find_element(By.XPATH,'//*[@id="root"]/div/div[2]/main/div[1]/form/div[1]/div/input')
 

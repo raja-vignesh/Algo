@@ -67,10 +67,20 @@ R1 = 0.0
 R2 = 0.0
 R3 = 0.0
 R4 = 0.0
+R5 = 0.0
+R6 = 0.0
+R7 = 0.0
+R8 = 0.0
+R9 = 0.0
 S1 = 0.0
 S2 = 0.0
 S3 = 0.0
 S4 = 0.0
+S5 = 0.0
+S6 = 0.0
+S7 = 0.0
+S8 = 0.0
+S9 = 0.0
 tradeTriggered = False
 tradeActivated = False
 triggeredBy = None
@@ -111,11 +121,21 @@ def open_socket():
     global R1
     global R2 
     global R3 
-    global R4 
+    global R4
+    global R5
+    global R6
+    global R7
+    global R8
+    global R9 
     global S1
     global S2 
     global S3 
     global S4 
+    global S5
+    global S6
+    global S7
+    global S8
+    global S9 
     global triggeredBy
     global TRIGGERED
     global ACTIVATED 
@@ -137,11 +157,21 @@ def open_socket():
         R2 = cpr_levels['r2']
         R3 = cpr_levels['r3']
         R4 = cpr_levels['r4']
+        R5 = cpr_levels['r5']
+        R6 = cpr_levels['r6']
+        R7 = cpr_levels['r7']
+        R8 = cpr_levels['r8']
+        R9 = cpr_levels['r9']
         S1 = cpr_levels['s1']
         S2 = cpr_levels['s2']
         S3 = cpr_levels['s3']
         S4 = cpr_levels['s4']
-        print(Pivot,R1,R2,R3,R4,S1,S2,S3,S4)
+        S5 = cpr_levels['s5']
+        S6 = cpr_levels['s6']
+        S7 = cpr_levels['s7']
+        S8 = cpr_levels['s8']
+        S9 = cpr_levels['s9']
+        print(Pivot,R1,R2,R3,R4,R6,R7,R8,R9,S1,S2,S3,S4,S5,S6,S7,S8,S9)
         sendNotifications("CPR loaded")
     
     sendNotifications("Script Start Time :: " + str(datetime.datetime.now()))
@@ -291,11 +321,21 @@ def checkTheRange(ltp,cndn):
     global R1
     global R2 
     global R3 
-    global R4 
+    global R4
+    global R5
+    global R6
+    global R7
+    global R8
+    global R9 
     global S1
     global S2 
     global S3 
     global S4 
+    global S5
+    global S6
+    global S7
+    global S8
+    global S9 
     global rangeDifference
     global triggeredBy
     global TRIGGERED
@@ -356,6 +396,61 @@ def checkTheRange(ltp,cndn):
              else:
                 sendNotifications(f"Trade {cndn} by R4 condition")
                 return True
+    elif R5 - rangeDifference <= ltp <= R5 + rangeDifference:
+        if cndn == TRIGGERED:
+            triggeredBy = 'R5'
+            sendNotifications(f"Trade {cndn} by R5 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'R5':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by R5 condition")
+                return True
+    elif R6 - rangeDifference <= ltp <= R6 + rangeDifference:
+        if cndn == TRIGGERED:
+            triggeredBy = 'R6'
+            sendNotifications(f"Trade {cndn} by R6 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'R6':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by R6 condition")
+                return True
+    elif R7 - rangeDifference <= ltp <= R7 + rangeDifference:
+        if cndn == TRIGGERED:
+            triggeredBy = 'R7'
+            sendNotifications(f"Trade {cndn} by R7 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'R7':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by R7 condition")
+                return True
+    elif R8 - rangeDifference <= ltp <= R8 + rangeDifference:
+        if cndn == TRIGGERED:
+            triggeredBy = 'R8'
+            sendNotifications(f"Trade {cndn} by R8 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'R8':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by R8 condition")
+                return True
+    elif R9 - rangeDifference <= ltp <= R9 + rangeDifference:
+        if cndn == TRIGGERED:
+            triggeredBy = 'R9'
+            sendNotifications(f"Trade {cndn} by R9 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'R9':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by R9 condition")
+                return True
     elif S1 - rangeDifference <= ltp <= S1 + rangeDifference:
         if cndn == TRIGGERED:
             triggeredBy = 'S1'
@@ -399,6 +494,61 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by S4 condition")
+                return True
+    elif S5 - rangeDifference <= ltp <= S5 + rangeDifference:
+        if cndn == TRIGGERED:
+            triggeredBy = 'S5'
+            sendNotifications(f"Trade {cndn} by S5 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'S5':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by S5 condition")
+                return True
+    elif S6 - rangeDifference <= ltp <= S6 + rangeDifference:
+        if cndn == TRIGGERED:
+            triggeredBy = 'S6'
+            sendNotifications(f"Trade {cndn} by S6 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'S6':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by S6 condition")
+                return True
+    elif S7 - rangeDifference <= ltp <= S7 + rangeDifference:
+        if cndn == TRIGGERED:
+            triggeredBy = 'S7'
+            sendNotifications(f"Trade {cndn} by S7 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'S7':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by S7 condition")
+                return True
+    elif S8 - rangeDifference <= ltp <= S8 + rangeDifference:
+        if cndn == TRIGGERED:
+            triggeredBy = 'S8'
+            sendNotifications(f"Trade {cndn} by S8 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'S8':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by S8 condition")
+                return True
+    elif S9 - rangeDifference <= ltp <= S9 + rangeDifference:
+        if cndn == TRIGGERED:
+            triggeredBy = 'S9'
+            sendNotifications(f"Trade {cndn} by S9 condition")
+            return True
+        elif cndn == ACTIVATED:
+             if triggeredBy == 'S9':
+                return False
+             else:
+                sendNotifications(f"Trade {cndn} by S9 condition")
                 return True
     else:
         return False

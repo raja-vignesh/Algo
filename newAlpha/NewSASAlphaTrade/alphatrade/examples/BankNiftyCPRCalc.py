@@ -18,12 +18,12 @@ from SendNotifications import sendNotifications
 from SAS import createSession
 from strikes import getNiftyMonth,getNiftyWeeklyCall,getNiftyWeeklyPut,getNiftyATMStrikes,getNifty927Stoploss,getOptionInstrumentandPrices
 from Trade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrdersReentry,unsubscribeToPrices
-from Common import isExpiryDay,getNiftyFutureScrip,getNiftySpotScrip,getIndiaVixScrip,niftyAcceptedDifference,readContentsofFile
+from Common import isExpiryDay,getNiftyFutureScrip,getBankNiftySpotScrip,getIndiaVixScrip,niftyAcceptedDifference,readContentsofFile
 import os,sys
 import numpy as np
 
-callATMOrder = SellOrder(StrikeType.CALL,IndexType.NIFTY,False)
-putATMOrder =  SellOrder(StrikeType.PUT,IndexType.NIFTY,False)
+callATMOrder = SellOrder(StrikeType.CALL,IndexType.BNIFTY,False)
+putATMOrder =  SellOrder(StrikeType.PUT,IndexType.BNIFTY,False)
 
 # callATMOrder.quantity = 50 * 1
 # putATMOrder.quantity = 50 * 1
@@ -96,7 +96,7 @@ def open_socket():
     global LowNifty 
     global CloseNifty 
 
-    Nifty_scrip = getNiftySpotScrip()
+    Nifty_scrip = getBankNiftySpotScrip()
     
     #while datetime.datetime.now().time() <= time(9,23):
     #   sleep(30)
@@ -149,13 +149,13 @@ def open_socket():
         print(f"{level}: {value}")
 
     # Output file name
-    output_file = "NiftyCPR.txt"
+    output_file = "BNCPR.txt"
 
     # Write CPR levels to file
     write_to_file(cpr_levels, output_file)
 
-    print(f"CPR levels have been written to {output_file}.")
-    sendNotifications(f"CPR levels have been written to {output_file}.")
+    print(f"BN CPR levels have been written to {output_file}.")
+    sendNotifications(f"BN CPR levels have been written to {output_file}.")
 
     if os.path.exists(output_file):
         txt = readContentsofFile(output_file)
@@ -290,6 +290,6 @@ def open_callback():
 
     
 if(__name__ == '__main__'):
-    sendNotifications('Nifty CPR calc started')
+    sendNotifications('Bank Nifty CPR calc started')
     #while True:
     main()
