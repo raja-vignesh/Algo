@@ -144,7 +144,6 @@ def open_socket():
                         options = getOptionInstrumentandPrices(sas,BankNiftyFut_scrip,BNAvgPrice)
 
                         instruments = options[0]
-                        print(instruments)
                         strikePrices= options[1]
                       
                         # for inst in instruments:

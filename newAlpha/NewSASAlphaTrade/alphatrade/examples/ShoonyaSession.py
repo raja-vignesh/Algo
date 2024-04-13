@@ -27,6 +27,10 @@ def createShoonyaSession():
 
             shoonya.set_session(user,pwd,keyring.get_password('shoonya', 'token'))
 
+            ret = shoonya.get_holdings()
+            if (ret[0]['stat'] == 'Not_Ok'):
+                 return ValueError 
+
         except Exception as e: 
             sendNotifications('login failed.. creating shoonya token')
             createShoonyaToken()
@@ -45,7 +49,7 @@ def validateSession():
     global shoonya 
 
     ret = shoonya.get_holdings()
-    if (ret['stat'] == 'Ok'):
+    if (ret[0]['stat'] == 'Ok'):
         return shoonya
     else:
         createShoonyaToken()
