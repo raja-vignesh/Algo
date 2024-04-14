@@ -159,7 +159,7 @@ def open_socket():
 
     file_path = os.path.abspath(output_file)
 
-    print("File path:", file_path)
+    sendNotifications("File path:", file_path)
 
     if os.path.exists(output_file):
         txt = readContentsofFile(output_file)
