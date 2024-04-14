@@ -153,13 +153,13 @@ def open_socket():
 
     # Write CPR levels to file
     write_to_file(cpr_levels, output_file)
-
+    sendNotifications(f'cpr_levels {cpr_levels}')     
     print(f"CPR levels have been written to {output_file}.")
     sendNotifications(f"CPR levels have been written to {output_file}.")
 
     file_path = os.path.abspath(output_file)
 
-    sendNotifications("File path:", file_path)
+    sendNotifications(f"File path: { file_path}")
 
     if os.path.exists(output_file):
         txt = readContentsofFile(output_file)
