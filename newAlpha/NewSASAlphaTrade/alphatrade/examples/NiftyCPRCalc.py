@@ -157,6 +157,10 @@ def open_socket():
     print(f"CPR levels have been written to {output_file}.")
     sendNotifications(f"CPR levels have been written to {output_file}.")
 
+    file_path = os.path.abspath(output_file)
+
+    print("File path:", file_path)
+
     if os.path.exists(output_file):
         txt = readContentsofFile(output_file)
         sendNotifications(txt)
