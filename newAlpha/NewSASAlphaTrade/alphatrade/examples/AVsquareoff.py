@@ -47,6 +47,7 @@ def squareOff():
     calculateMTM(positions)
     
 def sqaureOffPosition(position):
+    sas = None
     try:
        quantity = 0
        sqaureoffTransactionType = ''
@@ -83,7 +84,7 @@ def cancelPendingOrders():
     sendNotifications('pending orders cancelled')
 
 def calculateMTM(positions):
-    global sas
+    sas = None
     
     mtm = 0.0
     openPositions = 0

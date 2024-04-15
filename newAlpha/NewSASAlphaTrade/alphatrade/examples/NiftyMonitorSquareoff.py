@@ -9,8 +9,7 @@ from time import sleep
 from datetime import date,time
 import datetime
 from Orders import placeMarketOrders,getDaywisePositions,getPendingOrders,cancelOrder
-#from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
-from alice_blue import TransactionType
+from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
 from strikes import getNiftyMaxLoss,getNiftyMaxProfit
 from SendNotifications import sendNotifications
 from SAS import createSession,reConnectSession
