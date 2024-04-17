@@ -21,6 +21,7 @@ from Trade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOr
 from Common import isExpiryDay,getNiftyFutureScrip,getBankNiftySpotScrip,getIndiaVixScrip,niftyAcceptedDifference,readContentsofFile
 import os,sys
 import numpy as np
+from ShoonyaTrade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrdersReentry
 
 callATMOrder = SellOrder(StrikeType.CALL,IndexType.BNIFTY,False)
 putATMOrder =  SellOrder(StrikeType.PUT,IndexType.BNIFTY,False)

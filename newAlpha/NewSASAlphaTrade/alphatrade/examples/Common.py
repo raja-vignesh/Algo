@@ -21,6 +21,9 @@ from alphatrade import TransactionType
 def getNiftyCPRDifference():
     return 6
 
+def getBankNiftyCPRDifference():
+    return 6
+
 def getBankNiftyFutureScrip():
     return {'exchangeCode': 2, 'instrumentToken': 52220}
 
