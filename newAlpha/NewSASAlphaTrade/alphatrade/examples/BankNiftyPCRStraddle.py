@@ -186,7 +186,7 @@ def open_socket():
 
     instruments = [BankNifty_scrip]
     sas.subscribe_multiple_detailed_marketdata(instruments) 
-    sendNotifications("Starting checks hoo hooo...")
+    sendNotifications("Bank starting checks hoo hooo...")
     while not tradeTriggered or not tradeActivated:
         sleep(1)
         response = sas.read_multiple_detailed_marketdata()
