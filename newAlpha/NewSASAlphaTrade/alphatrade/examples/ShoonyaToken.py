@@ -2,6 +2,7 @@ from NorenRestApiPy.NorenApi import NorenApi
 import pyotp
 from SendNotifications import sendNotifications
 from time import sleep
+from MasterData import downloadMasterData
 import keyring
 shoonya = None
 
@@ -31,9 +32,11 @@ def createShoonyaToken():
             # Make the API call
             ret = shoonya.login(userid=user, password=pwd, twoFA=factor2, vendor_code=vc, api_secret=app_key, imei=imei)
             if ret['stat'] == 'Ok':
-                sendNotifications("shoonya success")
                 keyring.set_password("shoonya", "token", ret['susertoken'])
                 sendNotifications(f"shoonya token {keyring.get_password('shoonya', 'token')}")
+                downloadMasterData()
+                sendNotifications("shoonya master downloaded")
+
             else:
                 sendNotifications("shoonya failed")
             print(shoonya)

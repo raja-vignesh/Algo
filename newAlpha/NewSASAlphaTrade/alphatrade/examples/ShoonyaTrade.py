@@ -16,7 +16,7 @@ from datetime import date,time,timedelta
 import datetime
 import logging
 from SAS import createSession,reConnectSession
-from ShoonyaSession import createShoonyaSession,validateSession
+from ShoonyaSession import createShoonyaSession,validateSession,get_trading_symbol_by_token
 from AVSLModifier import modifySLtoCost
 from strikes import getNiftyStopLoss,getExpirySL
 from Common import readContentsofFile,isExpiryTrades,isBNExpiryDay,format_option_symbol
@@ -32,7 +32,7 @@ def placeStraddleOrders(sas,shoonya,orders):
 
     for order in orders:
         order.orderID =  placeMarketOrders(shoonya,TransactionType.Sell,order.quantity,order.instrument)
-        order.shoonyaToken = format_option_symbol(order.instrument['tradingSymbol'])
+        order.shoonyaToken = get_trading_symbol_by_token(order.instrument['instrumentToken'])
     
     for order in orders:    
        sendNotifications(f'Sold with {order.orderID }')  
@@ -610,7 +610,7 @@ def squareOff(sas,inst):
         sendNotifications(f'square off Inst {inst}')
         positions = getDaywisePositions(sas)
         for position in positions:
-            if int(position['tsym']) == format_option_symbol(inst['tradingSymbol']):
+            if int(position['tsym']) == get_trading_symbol_by_token(inst['instrumentToken']):
                 sendNotifications('token matched')
                 sqaureOffPosition(sas,position) 
                 break

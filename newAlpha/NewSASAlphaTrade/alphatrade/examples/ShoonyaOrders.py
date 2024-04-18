@@ -8,7 +8,7 @@ Created on Sun Aug 22 21:53:34 2021
 from alphatrade import ProductType,OrderType,TransactionType
 from SendNotifications import sendNotifications
 import enum
-from ShoonyaSession import getConnectionObject,reGenerateToken,validateSession
+from ShoonyaSession import getConnectionObject,reGenerateToken,validateSession,get_trading_symbol_by_token
 from time import sleep
 from Common import format_option_symbol,convert_transaction_type
 
@@ -268,7 +268,7 @@ def placeMarketOrders(shoonya,transactionType,quantity,instrument,product_type =
   try:
       response = connection.place_order(buy_or_sell=convert_transaction_type(transactionType),exchange='NFO',product_type='I',quantity=15,
        retention='DAY',
-       tradingsymbol= format_option_symbol(instrument['tradingSymbol']),
+       tradingsymbol= get_trading_symbol_by_token(instrument['instrumentToken']),
        price_type='MKT',
        discloseqty=0,
        price=0, 
@@ -380,7 +380,7 @@ def placeStopLossLimitOrder(sas,transactionType,quantity,instrument,price,order,
     try:
        response = connection.place_order(exchange='NFO',product_type='I',buy_or_sell=convert_transaction_type(transactionType),quantity=15,
        retention='DAY',
-       tradingsymbol= format_option_symbol(instrument['tradingSymbol']),
+       tradingsymbol= get_trading_symbol_by_token(instrument['instrumentToken']),
        price_type='SL-LMT',
        discloseqty=0,
        price=tradePrice, 
@@ -416,7 +416,7 @@ def modifyOrder(sas,transactionType,instrument,orderId,price,quantity,product_ty
     try:
         response  = connection.modify_order(exchange='NFO',product_type='I',buy_or_sell=convert_transaction_type(transactionType),quantity=15,
        retention='DAY',
-       tradingsymbol= format_option_symbol(instrument['tradingSymbol']),
+       tradingsymbol= get_trading_symbol_by_token(instrument['instrumentToken']),
        price_type='SL-LMT',
        discloseqty=0,
        price=tradePrice, 

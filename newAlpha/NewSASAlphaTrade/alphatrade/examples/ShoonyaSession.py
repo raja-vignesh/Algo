@@ -5,6 +5,7 @@ import keyring
 from ShoonyaToken import createShoonyaToken
 
 shoonya = None
+data = []
 
 class ShoonyaApiPy(NorenApi):
     def __init__(self):
@@ -14,6 +15,7 @@ class ShoonyaApiPy(NorenApi):
 
 def createShoonyaSession():
     global shoonya
+    global data
     shoonya = None
     while shoonya is None:
         try:
@@ -30,6 +32,32 @@ def createShoonyaSession():
             ret = shoonya.get_holdings()
             if (ret[0]['stat'] == 'Not_Ok'):
                  return ValueError 
+            # Step 3: Read the text file
+            txt_file_path = "extracted_files/NFO_symbols.txt"  # Path to the extracted text file
+
+            data = []
+
+            with open(txt_file_path, 'r') as file:
+                # Skip the header line
+                next(file)
+                for line in file:
+                    # Split each line by comma and store in a dictionary
+                    tokens = line.strip().split(',')
+                    record = {
+                        "Exchange": tokens[0],
+                        "Token": int(tokens[1]),
+                        "LotSize": int(tokens[2]),
+                        "Symbol": tokens[3],
+                        "TradingSymbol": tokens[4],
+                        "Expiry": tokens[5],
+                        "Instrument": tokens[6],
+                        "OptionType": tokens[7],
+                        "StrikePrice": float(tokens[8]),
+                    }
+                    data.append(record)
+
+            # Step 4: Load the contents into an object
+
 
         except Exception as e: 
             sendNotifications('login failed.. creating shoonya token')
@@ -60,3 +88,10 @@ def validateSession():
 def reGenerateToken():
     global shoonya
     return shoonya
+
+def get_trading_symbol_by_token(token):
+    global data
+    for record in data:
+        if record['Token'] == token:
+            return record['TradingSymbol']
+    return None
