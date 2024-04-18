@@ -165,7 +165,6 @@ def open_socket():
                     niftyAvgPrice = (NiftySpot + NiftyFut)/2.0
 
                     options = getOptionInstrumentandPrices(sas,Nifty_FutScrip,niftyAvgPrice)
-                    sendNotifications(f'nifty avg price is {niftyAvgPrice}')
                     instrumentsList = options[0]
                     strikePrices= options[1]
                     
@@ -185,7 +184,6 @@ def open_socket():
                             differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
                     
                     index_min = np.argmin(differentialPremiums)
-                    sendNotifications(f'strikes {strikePrices}')
                     sendNotifications(f'premiums {differentialPremiums}')
                     atm = strikePrices[index_min]
                     atmPremiumDifference = differentialPremiums[index_min]

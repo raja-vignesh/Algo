@@ -54,11 +54,9 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,SLCorrection=False
     BNCallSL = stoploss
     BNPutSL = stoploss
     sendNotifications('placeStraddleStopOders')
-    sendNotifications(type(orders))
 
     try:
         for order in orders:
-            sendNotifications('begining')
             order.tradedPrice = getTradedPriceOfOrder(order.orderID)
             sendNotifications(f'traded price of {order.strike} {order.strikeType} is {order.tradedPrice}')                       
             sleep(1)

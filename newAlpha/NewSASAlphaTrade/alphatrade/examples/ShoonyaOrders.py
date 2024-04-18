@@ -263,7 +263,6 @@ def placeMarketOrders(shoonya,transactionType,quantity,instrument,product_type =
   global connection 
   connection = getConnectionObject()
   sendNotifications('placeMarketOrders')
-  sendNotifications(f'connection {connection}')
 
   try:
       response = connection.place_order(buy_or_sell=convert_transaction_type(transactionType),exchange='NFO',product_type='I',quantity=15,

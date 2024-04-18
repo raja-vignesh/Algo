@@ -84,7 +84,9 @@ S9 = 0.0
 tradeTriggered = False
 tradeActivated = False
 triggeredBy = None
+activatedBy = None
 TRIGGERED = 'triggered'
+cpr_levels = None
 ACTIVATED = 'activated'
 def main():
     logging.debug('main')
@@ -103,6 +105,41 @@ def main():
     if socket_opened == False:
         open_socket()
 
+
+def calculateUpperAndLowerlimits():
+    # Initialize arrays for keys and values
+    global cpr_levels
+    global activatedBy
+    keys_array = []
+    values_array = []
+
+    # Iterate through the dictionary and separate keys and values
+    for key, value in cpr_levels.items():
+        keys_array.append(key)
+        values_array.append(value)
+
+    # Print the resulting arrays
+    print("Keys array:", keys_array)
+    print("Values array:", values_array)
+
+    sendNotifications(keys_array)
+    sendNotifications(values_array)
+
+    target_index = keys_array.index(activatedBy.lower())
+    upperIndex = target_index + 2
+    lowerIndex = target_index - 2
+    upperValue = values_array[upperIndex]
+    lowerValue = values_array[lowerIndex]
+    level = {'upper': upperValue, 'lower': lowerValue}
+    sendNotifications(level)
+    filename = 'BNUpperLower.txt'
+    if not os.path.exists(filename):
+        with open(filename, 'w') as textFile:
+            textFile.write(str(level))
+    elif os.path.exists(filename):
+        with open(filename, 'w') as textFile:
+            textFile.write(str(level))
+    sendNotifications('UPPER LOWER ready')
 ####################################################################################################################
 def open_socket():
     global socket_opened 
@@ -121,7 +158,7 @@ def open_socket():
     global instruments
     global strikePrices
     global atmPremiumDifference 
-
+    global cpr_levels
     global Pivot
     global R1
     global R2 
@@ -142,6 +179,7 @@ def open_socket():
     global S8
     global S9 
     global triggeredBy
+    global activatedBy
     global TRIGGERED
     global ACTIVATED 
     BankNifty_FutScrip = getBankNiftyFutureScrip()
@@ -198,7 +236,7 @@ def open_socket():
             tradeActivated = checkTheRange(BNSpot,ACTIVATED)
         pass
     sas.unsubscribe_multiple_detailed_marketdata(instruments) 
-
+    calculateUpperAndLowerlimits()
     if datetime.datetime.now().time() >= time(14,55): 
         sendNotifications('Bank CPR is tired... snooze')
         exit(0)
@@ -260,7 +298,6 @@ def open_socket():
                     
                     index_min = np.argmin(differentialPremiums)
                     
-                    sendNotifications(f'strikes {strikePrices}')
                     sendNotifications(f'premiums {differentialPremiums}')
                     atm = strikePrices[index_min]
                     atmPremiumDifference = differentialPremiums[index_min]
@@ -341,6 +378,7 @@ def checkTheRange(ltp,cndn):
     global S9 
     global rangeDifference
     global triggeredBy
+    global activatedBy
     global TRIGGERED
     global ACTIVATED 
     if Pivot - rangeDifference <= ltp <= Pivot + rangeDifference:
@@ -353,6 +391,7 @@ def checkTheRange(ltp,cndn):
                 return False
             else: 
                 sendNotifications(f"Trade {cndn} by pivot condition")
+                activatedBy = 'Pivot'
                 return True
     elif R1 - rangeDifference <= ltp <= R1 + rangeDifference:
         if cndn == TRIGGERED:
@@ -364,6 +403,7 @@ def checkTheRange(ltp,cndn):
                 return False
             else:
                 sendNotifications(f"Trade {cndn} by R1 condition")
+                activatedBy = 'R1'
                 return True
     elif R2 - rangeDifference <= ltp <= R2 + rangeDifference:
         if cndn == TRIGGERED:
@@ -375,6 +415,7 @@ def checkTheRange(ltp,cndn):
                 return False
             else:
                 sendNotifications(f"Trade {cndn} by R2 condition")
+                activatedBy = 'R2'
                 return True
     elif R3 - rangeDifference <= ltp <= R3 + rangeDifference:
         if cndn == TRIGGERED:
@@ -386,6 +427,7 @@ def checkTheRange(ltp,cndn):
             if triggeredBy == 'R3':
                 return False
             else:
+                activatedBy = 'R3'
                 sendNotifications(f"Trade {cndn} by R3 condition")
                 return True
     elif R4 - rangeDifference <= ltp <= R4 + rangeDifference:
@@ -398,6 +440,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by R4 condition")
+                activatedBy = 'R4' 
                 return True
     elif R5 - rangeDifference <= ltp <= R5 + rangeDifference:
         if cndn == TRIGGERED:
@@ -409,6 +452,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by R5 condition")
+                activatedBy = 'R5' 
                 return True
     elif R6 - rangeDifference <= ltp <= R6 + rangeDifference:
         if cndn == TRIGGERED:
@@ -420,6 +464,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by R6 condition")
+                activatedBy = 'R6'
                 return True
     elif R7 - rangeDifference <= ltp <= R7 + rangeDifference:
         if cndn == TRIGGERED:
@@ -431,6 +476,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by R7 condition")
+                activatedBy = 'R7'
                 return True
     elif R8 - rangeDifference <= ltp <= R8 + rangeDifference:
         if cndn == TRIGGERED:
@@ -442,6 +488,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by R8 condition")
+                activatedBy = 'R8'
                 return True
     elif R9 - rangeDifference <= ltp <= R9 + rangeDifference:
         if cndn == TRIGGERED:
@@ -453,6 +500,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by R9 condition")
+                activatedBy = 'R9'
                 return True
     elif S1 - rangeDifference <= ltp <= S1 + rangeDifference:
         if cndn == TRIGGERED:
@@ -464,6 +512,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by S1 condition")
+                activatedBy = 'S1'
                 return True
     elif S2 - rangeDifference <= ltp <= S2 + rangeDifference:
         if cndn == TRIGGERED:
@@ -475,6 +524,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by S2 condition")
+                activatedBy = 'S2'
                 return True
     elif S3 - rangeDifference <= ltp <= S3 + rangeDifference:
          if cndn == TRIGGERED:
@@ -486,6 +536,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by S3 condition")
+                activatedBy = 'S3'
                 return True
     elif S4 - rangeDifference <= ltp <= S4 + rangeDifference:
         if cndn == TRIGGERED:
@@ -497,6 +548,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by S4 condition")
+                activatedBy = 'S4'
                 return True
     elif S5 - rangeDifference <= ltp <= S5 + rangeDifference:
         if cndn == TRIGGERED:
@@ -508,6 +560,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by S5 condition")
+                activatedBy = 'S5'
                 return True
     elif S6 - rangeDifference <= ltp <= S6 + rangeDifference:
         if cndn == TRIGGERED:
@@ -519,6 +572,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by S6 condition")
+                activatedBy = 'S6'
                 return True
     elif S7 - rangeDifference <= ltp <= S7 + rangeDifference:
         if cndn == TRIGGERED:
@@ -530,6 +584,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by S7 condition")
+                activatedBy = 'S7'
                 return True
     elif S8 - rangeDifference <= ltp <= S8 + rangeDifference:
         if cndn == TRIGGERED:
@@ -541,6 +596,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by S8 condition")
+                activatedBy = 'S8'
                 return True
     elif S9 - rangeDifference <= ltp <= S9 + rangeDifference:
         if cndn == TRIGGERED:
@@ -552,6 +608,7 @@ def checkTheRange(ltp,cndn):
                 return False
              else:
                 sendNotifications(f"Trade {cndn} by S9 condition")
+                activatedBy = 'S9'
                 return True
     else:
         return False
@@ -571,7 +628,6 @@ def event_handler_quote_update(message):
     global instruments
     global premiums
     global strikePrices
-    print(message)
     ltp = message['last_traded_price'] * .01
 
     if  message['instrument_token'] == BankNifty_scrip['instrumentToken']:

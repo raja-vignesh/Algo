@@ -110,8 +110,6 @@ def open_socket():
     
     
     instruments = [BankNiftyFut_scrip,BankNifty_scrip]
-    sendNotifications(f'BankNiftyFut_scrip {BankNiftyFut_scrip}')
-    sendNotifications(f'BankNifty_scrip {BankNifty_scrip}')
 
     sas.subscribe_multiple_compact_marketdata(instruments) 
     sleep(1)
@@ -138,7 +136,6 @@ def open_socket():
                     ## Added for ATM from OC##
                
                     try: 
-                        sendNotifications('Calculating ATM using OC')
                         BNAvgPrice = round((BNSpot + BNFut) / 2.0,2)
                         sendNotifications(f'BN avg price is {BNAvgPrice}')
                         options = getOptionInstrumentandPrices(sas,BankNiftyFut_scrip,BNAvgPrice)
@@ -164,7 +161,6 @@ def open_socket():
                             if index%2 == 0:
                                 differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
                         
-                        sendNotifications(f'strikes {strikePrices}')
                         sendNotifications(f'premiums {differentialPremiums}')
 
                         index_min = np.argmin(differentialPremiums)
@@ -314,7 +310,6 @@ def placeStopOrders():
     tradeActive = True
     #watchStraddleStopOrders(sas,shoonya,orders,tradeActive,'MorningBNStraddle',reentry=True)     
     watchStraddleStopOrdersReentry(sas,orders,tradeActive,'MorningBNStraddle',reentry=True)        
-    sendNotifications("exiting")
 
 if(__name__ == '__main__'):
     logging.debug('MorningBNStraddle started')

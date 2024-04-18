@@ -174,7 +174,7 @@ def open_socket():
         print(Pivot,R1,R2,R3,R4,R6,R7,R8,R9,S1,S2,S3,S4,S5,S6,S7,S8,S9)
         sendNotifications("CPR loaded")
     
-    sendNotifications("Script Start Time :: " + str(datetime.datetime.now()))
+    sendNotifications("Nifty cpr Start Time :: " + str(datetime.datetime.now()))
     
     
     sas.run_socket()
@@ -232,7 +232,6 @@ def open_socket():
                     niftyAvgPrice = (NiftySpot + NiftyFut)/2.0
 
                     options = getOptionInstrumentandPrices(sas,Nifty_FutScrip,niftyAvgPrice)
-                    sendNotifications(f'nifty avg price is {niftyAvgPrice}')
                     instruments = options[0]
                     strikePrices= options[1]
                     
@@ -256,7 +255,6 @@ def open_socket():
                     
                     index_min = np.argmin(differentialPremiums)
                     
-                    sendNotifications(f'strikes {strikePrices}')
                     sendNotifications(f'premiums {differentialPremiums}')
                     atm = strikePrices[index_min]
                     atmPremiumDifference = differentialPremiums[index_min]
@@ -570,7 +568,6 @@ def event_handler_quote_update(message):
     global instruments
     global premiums
     global strikePrices
-    print(message)
     ltp = message['last_traded_price'] * .01
 
     if  message['instrument_token'] == Nifty_scrip['instrumentToken']:
