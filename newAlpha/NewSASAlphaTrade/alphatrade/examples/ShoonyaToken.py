@@ -42,6 +42,7 @@ def createShoonyaToken():
             print(shoonya)
 
         except Exception as e: 
+            sendNotifications(e)
             sendNotifications('login failed.. retrying in 2 mins')
             sleep(120)  # Retry after 2 minutes
         pass
