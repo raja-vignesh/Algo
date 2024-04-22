@@ -15,7 +15,7 @@ from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
 #from alice_blue import LiveFeedType,TransactionType,OrderType,ProductType
 from SendNotifications import sendNotifications
 from SAS import createSession
-from strikes import getBankNiftyMonth,getBNWeeklyCall,getBNWeeklyPut,getBankNiftyStrikes,getBN920Stoploss,getOptionInstrumentandPrices
+from strikes import getBankNiftyMonth,getBNWeeklyCall,getBNWeeklyPut,getBankNiftyStrikes,getBN930Stoploss,getOptionInstrumentandPrices
 from Trade import unsubscribeToPrices
 from ShoonyaTrade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrdersReentry
 from Common import isExpiryDay,writeToTheFileWithContent,bankNiftyAcceptedDifference,getBankNiftyFutureScrip,getBankNiftySpotScrip,getIndiaVixScrip
@@ -33,7 +33,7 @@ socket_opened = False
 BankNifty_scrip = None
 BankNiftyFut_scrip = None
 order_placed = False
-stoploss = getBN920Stoploss()
+stoploss = getBN930Stoploss()
 soldOrderIds = []
 BNLTP = 0.0
 BNSpot = 0.0

@@ -188,7 +188,7 @@ def getBN920Stoploss():
     
 def getBN930Stoploss():
     day = datetime.date.today().weekday()
-    if isExpiryDay() == True or isPreExpiryDay() == True:
+    if isBNPreExpiryDay() == True or isBNExpiryDay() == True:
         return .25
     elif day == 1:
         return .23

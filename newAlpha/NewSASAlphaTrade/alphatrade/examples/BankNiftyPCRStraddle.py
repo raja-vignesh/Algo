@@ -15,7 +15,7 @@ from ShoonyaOrders import SellOrder
 import telegram_send
 from SendNotifications import sendNotifications
 from SAS import createSession
-from strikes import getNiftyMonth,getNiftyWeeklyCall,getNiftyWeeklyPut,getBankNiftyStrikes,getBN920Stoploss,getOptionInstrumentandPrices
+from strikes import getNiftyMonth,getNiftyWeeklyCall,getNiftyWeeklyPut,getBankNiftyStrikes,getBN930Stoploss,getOptionInstrumentandPrices
 from Trade import unsubscribeToPrices
 from ShoonyaTrade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrdersReentry
 
@@ -51,7 +51,7 @@ strikePrices = []
 premiums = [0] * 12
 ## Added for ATM from OC##
 
-stoploss = getBN920Stoploss()
+stoploss = getBN930Stoploss()
 orders = []
 soldOrderIds = []
 BNLTP = 0.0
