@@ -309,19 +309,17 @@ def open_socket():
             current_ltp = BNLTP
 
             if atm:
-                callATMOrder.strike,putATMOrder.strike = atm,atm
-                sendNotifications(f"ATM for options is {atm}")
-                
-                strikes = getBankNiftyStrikes(current_ltp)
-                sendNotifications(f"old atm calc is {strikes[0]}")
-
+                    callATMOrder.strike,putATMOrder.strike = atm,atm
+                    sendNotifications(f"ATM for options is {atm}")
+                    
+                    strikes = getBankNiftyStrikes(current_ltp)
+                    sendNotifications(f"ATM old averaging {strikes}")
             else:
-                strikes = getBankNiftyStrikes(current_ltp)
-                callATMOrder.strike,putATMOrder.strike = strikes[0],strikes[1]
-                sendNotifications(f"ATM from old calc is {strikes[0]}")
-                
-            sendNotifications(f"Bank spot is {BNSpot} and fut is {BNFut}")
-            sendNotifications("Bank price is :: " + str(current_ltp))
+                    callATMOrder.strike,putATMOrder.strike = getBankNiftyStrikes(current_ltp),getBankNiftyStrikes(current_ltp)
+                    sendNotifications(f"ATM from calc is {callATMOrder.strike}")
+                    
+            sendNotifications(f"BN spot is {BNSpot} and Fut is {BNFut}")
+            sendNotifications("Bank Nifty price is :: " + str(current_ltp))
             #call = getNiftyWeeklyCall(sas,callATMOrder.strike)
             callATMOrder.instrument = instruments[index_min * 2]
             putATMOrder.instrument = instruments[(index_min * 2) + 1]
