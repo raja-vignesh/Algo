@@ -25,7 +25,7 @@ def getBankNiftyCPRDifference():
     return 6
 
 def getBankNiftyFutureScrip():
-    return {'exchangeCode': 2, 'instrumentToken': 52220}
+    return {'exchangeCode': 2, 'instrumentToken': 46923}
 
 def getBankNiftySpotScrip():
     return {'exchangeCode': 1, 'instrumentToken': 26009}
