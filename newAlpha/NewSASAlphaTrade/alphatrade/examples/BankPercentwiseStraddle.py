@@ -5,21 +5,32 @@ Created on Thu Sep 16 16:18:18 2021
 @author: Dhakshu
 """
 
+
 from time import sleep
+import time
 from datetime import date,time,timedelta
 import datetime
 import logging
-from Orders import placeMarketOrders,placeStopLossMarketorder,getOrderHistory,getTradedPriceOfOrder,modifyOrder,placeStopLossLimitOrder,getDaywisePositions,SellOrder,StrikeType,IndexType
-#from alphatrade import AlphaTrade, LiveFeedType,TransactionType,OrderType,ProductType
-from alice_blue import LiveFeedType,TransactionType,OrderType,ProductType
+from Orders import placeMarketOrders,placeStopLossMarketorder,getOrderHistory,getTradedPriceOfOrder,modifyOrder,placeStopLossLimitOrder,getDaywisePositions,StrikeType,IndexType
+from alphatrade import AlphaTrade, LiveFeedType,TransactionType,OrderType,ProductType
+from ShoonyaOrders import SellOrder
 import telegram_send
 from SendNotifications import sendNotifications
-from SAS import createSession,reConnectSession
-from strikes import getBankNiftyMonth,getBNWeeklyCall,getBNWeeklyPut,getBankNiftyStrikes,getUpperrefValue,getLowerrefValue,getBNStoploss,getOptionInstrumentandPrices
-from Trade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrders,unsubscribeToPrices,watchStraddleStopOrderswithSLMove
+from SAS import createSession
+from strikes import getNiftyMonth,getNiftyWeeklyCall,getNiftyWeeklyPut,getBankNiftyStrikes,getBN930Stoploss,getOptionInstrumentandPrices
+from Trade import unsubscribeToPrices
+from ShoonyaTrade import placeStraddleOrders,placeStraddleStopOders,watchStraddleStopOrdersReentry
+
+from Common import isBNExpiryDay,getBankNiftyFutureScrip,getBankNiftySpotScrip,bankNiftyAcceptedDifference,readContentsofFile,getBankNiftyCPRDifference
 import os,sys
 import numpy as np
-from Common import isExpiryDay,readContentsofFile,getBankNiftyFutureScrip,getBankNiftySpotScrip
+from ShoonyaSession import createShoonyaSession 
+
+callATMOrder = SellOrder(StrikeType.CALL,IndexType.BNIFTY,False)
+putATMOrder =  SellOrder(StrikeType.PUT,IndexType.BNIFTY,False)
+rangeDifference = getBankNiftyCPRDifference()
+# callATMOrder.quantity = 50 * 1
+# putATMOrder.quantity = 50 * 1
 
 quantity = 1
 
@@ -28,14 +39,16 @@ logging.getLogger().setLevel(logging.ERROR)
 ltp = 0
 
 sas = None
+shoonya = None
 socket_opened = False
 BankNifty_scrip = None
 BankNiftyFut_scrip = None
-
+lotSize = 25
 order_placed = False
-stoploss = getBNStoploss()
+stoploss = getBN930Stoploss()
 soldOrderIds = []
 BNLTP = 0.0
+benchmarkDifference = bankNiftyAcceptedDifference()
 
 BNSpot = 0.0
 BNFut = 0.0
@@ -48,6 +61,7 @@ lowerReference = 0.0
 
 upperSlotOver = False
 lowerSlotOver = False
+file_path = 'BNUpperLower.txt'  # Path to the file
 
 callATMOrder = SellOrder(StrikeType.CALL,IndexType.BNIFTY,False)
 putATMOrder =  SellOrder(StrikeType.PUT,IndexType.BNIFTY,False)
@@ -61,11 +75,17 @@ premiums = [0] * 12
 def main():
     logging.debug('main')
     global sas
+    global shoonya
     while sas is None:
         sas = createSession()
         if sas == None:
             sleep(90)
             pass
+    while shoonya is None:
+        shoonya = createShoonyaSession() 
+        if shoonya == None:
+             sleep(90)
+             pass
     if socket_opened == False:
         open_socket()
         
@@ -93,10 +113,6 @@ def open_socket():
     BankNifty_scrip = getBankNiftySpotScrip()
     
     socket_opened = False
-    
-    while datetime.datetime.now().time() <= time(9,25):
-        sleep(60)
-        pass
     
     
     
@@ -139,20 +155,21 @@ def setRefenceValues():
     global referenceValue
     global upperReference
     try:
-        
-        if os.path.exists('BNLTP.txt'):
-            txt = readContentsofFile('BNLTP.txt')
-            val = float(txt)
-            sendNotifications(f'read value is {val}')
-            referenceValue = val
-            upperReference = getUpperrefValue(val)
-            lowerReference = getLowerrefValue(val)
-            sendNotifications(f'BN is {val}')
+
+        while not os.path.exists(file_path):
+            sleep(300)
+            pass
+        sendNotifications(f'{file_path} detected')
+        if os.path.exists(file_path):
+            txt = readContentsofFile(file_path)
+            upperlower = eval(txt)
+            sendNotifications(f'read value is {upperlower}')
+            upperReference = float(upperlower['upper'])
+            lowerReference = float(upperlower['lower'])
     except FileNotFoundError:
         print('File not found')
         referenceValue = BNLTP
-        upperReference = getUpperrefValue(BNLTP)
-        lowerReference = getLowerrefValue(BNLTP)
+      
     sendNotifications(f'upper {upperReference} and lower {lowerReference} and BN {BNLTP}')
 
     
@@ -199,60 +216,86 @@ def createOrder():
         
         ## Added for ATM from OC##
    
-        try: 
-            sendNotifications('Calculating ATM using OC')
-            BNAvgPrice = round((BNSpot + BNFut) / 2.0,2)
-            sendNotifications(f'BN avg price is {BNAvgPrice}')
-            options = getOptionInstrumentandPrices(sas,BankNiftyFut_scrip,BNAvgPrice)
-            
-            instruments = options[0]
-            strikePrices= options[1]
-          
-            for inst in instruments:
-                sas.subscribe(inst, LiveFeedType.MARKET_DATA)
+        while atmPremiumDifference > benchmarkDifference:
+            sleep(3)
+            BNLTP = (BNSpot + BNFut) / 2.0
                 
-            sleep(6)
-            for inst in instruments:
-                sas.unsubscribe(inst, LiveFeedType.MARKET_DATA)
             
-            differentialPremiums = []
-            
-
-            for index,prem in enumerate(premiums):
-                if index%2 == 0:
-                    differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
-            
-            sendNotifications(f'strikes {strikePrices}')
-            sendNotifications(f'premiums {differentialPremiums}')
-            index_min = np.argmin(differentialPremiums)
-            atm = strikePrices[index_min]
-            print(atm)
-        except Exception as exep :
-            sendNotifications(f'{exep}')
-
-            
-        current_ltp = BNLTP
+                    
+            ## Added for ATM from OC##
         
-        if atm:
-            callATMOrder.strike,putATMOrder.strike = atm,atm
-            sendNotifications(f"ATM for options is {atm}")
+            try: 
+                BNAvgPrice = round((BNSpot + BNFut) / 2.0,2)
+                sendNotifications(f'BN avg price is {BNAvgPrice}')
+                options = getOptionInstrumentandPrices(sas,BankNiftyFut_scrip,BNAvgPrice)
+
+                instruments = options[0]
+                strikePrices= options[1]
+                
+                # for inst in instruments:
+                #     sas.subscribe(inst, LiveFeedType.MARKET_DATA)
+                    
+                sas.subscribe_multiple_compact_marketdata(instruments) 
+                sleep(2)
+                response = sas.read_multiple_compact_marketdata()
+                sleep(3)
+
+                for resp in list(response.values()):
+                    event_handler_quote_update(resp)
+                sas.unsubscribe_multiple_compact_marketdata(instruments) 
+                
+                differentialPremiums = []
+        
+                for index,prem in enumerate(premiums):
+                    if index%2 == 0:
+                        differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
+                
+                sendNotifications(f'premiums {differentialPremiums}')
+
+                index_min = np.argmin(differentialPremiums)
+                atmPremiumDifference = differentialPremiums[index_min]
+                sendNotifications(f' BN ATM prem diff {atmPremiumDifference} and waiting')
+
+            except Exception as exep :
+                sendNotifications(f'{exep}')
+            pass
+                
             
-            strikes = getBankNiftyStrikes(current_ltp)
-            sendNotifications(f"ATM old averaging {strikes}")
-        else:
-            callATMOrder.strike,putATMOrder.strike = getBankNiftyStrikes(current_ltp),getBankNiftyStrikes(current_ltp)
-            sendNotifications(f"ATM from calc is {callATMOrder.strike}")
-             
-        callATMOrder.instrument = getBNWeeklyCall(sas,callATMOrder.strike)
-        putATMOrder.instrument = getBNWeeklyPut(sas,putATMOrder.strike)
-        callATMOrder.instrumentToken = callATMOrder.instrument.token
-        putATMOrder.instrumentToken = putATMOrder.instrument.token
-        callATMOrder.quantity = int(callATMOrder.instrument.lot_size) * quantity
-        putATMOrder.quantity = int(putATMOrder.instrument.lot_size) * quantity
-        orders.append(callATMOrder)
-        orders.append(putATMOrder)
-        sleep(1)
-        placeorders()
+            sendNotifications('Morning BN ATM going to place orders')
+        
+            atm = strikePrices[index_min]
+                  
+     
+                    
+                
+                        
+            current_ltp = BNLTP
+                
+            if atm:
+                    callATMOrder.strike,putATMOrder.strike = atm,atm
+                    sendNotifications(f"ATM for options is {atm}")
+                    
+                    strikes = getBankNiftyStrikes(current_ltp)
+                    sendNotifications(f"ATM old averaging {strikes}")
+            else:
+                    callATMOrder.strike,putATMOrder.strike = getBankNiftyStrikes(current_ltp),getBankNiftyStrikes(current_ltp)
+                    sendNotifications(f"ATM from calc is {callATMOrder.strike}")
+                    
+            sendNotifications(f"BN spot is {BNSpot} and Fut is {BNFut}")
+            sendNotifications("Bank Nifty price is :: " + str(current_ltp))
+            callATMOrder.instrument = instruments[index_min * 2]
+            putATMOrder.instrument = instruments[(index_min * 2) + 1]
+            callATMOrder.instrumentToken =  callATMOrder.instrument['instrumentToken']
+            putATMOrder.instrumentToken = putATMOrder.instrument['instrumentToken']
+            callATMOrder.quantity = lotSize * quantity
+            putATMOrder.quantity = lotSize * quantity
+            orders.append(callATMOrder)
+            orders.append(putATMOrder)
+            sleep(1)
+                           
+                
+            placeorders()
+            order_placed = True
             
     except Exception as exep :
         logging.debug(exep)
@@ -318,18 +361,9 @@ def open_callback():
 def placeorders():
     global sas
     global orders
-    
-    try:
-        placeStraddleOrders(sas,orders)
-        sleep(1)
-        placeStopOrders()
-    except Exception as e:
-        #if e.message == 'Request Unauthorised':
-            sendNotifications(e)
-            sendNotifications("Unauthorised exception in placeorder percent straddle.. go for conn again")
-            sas = reConnectSession()
-            sleep(90)
-            placeorders()
+    placeStraddleOrders(sas,shoonya,orders)
+    sleep(3)
+    placeStopOrders()
 
 
         
@@ -338,27 +372,22 @@ def placeStopOrders():
     global tradeActive 
     global sas
     global orders
-    global callATMOrder
-    global putATMOrder
     
-    placeStraddleStopOders(sas,orders,stoploss)
+    placeStraddleStopOders(sas,orders,stoploss,SLCorrection=True,stratergy='BankPercent')
     tradeActive = True
-    if isExpiryDay() == True:
-        watchStraddleStopOrders(sas,orders,tradeActive,'PercentwiseStraddle') 
-    else:
-        watchStraddleStopOrderswithSLMove(sas,orders,tradeActive,'PercentwiseStraddle',True)
+    watchStraddleStopOrdersReentry(sas,orders,tradeActive,'BankPercent',reentry=True) 
 
         
     sendNotifications('Both orders should have finished')
-    orders = []
-    callATMOrder = SellOrder(StrikeType.CALL,IndexType.BNIFTY,False)
-    putATMOrder =  SellOrder(StrikeType.PUT,IndexType.BNIFTY,False)
-    checkforTrade()
+    #orders = []
+    #callATMOrder = SellOrder(StrikeType.CALL,IndexType.BNIFTY,False)
+    #putATMOrder =  SellOrder(StrikeType.PUT,IndexType.BNIFTY,False)
+    #checkforTrade()
           
   ##################################################################
 
 if(__name__ == '__main__'):
-    logging.debug('percentwise Starddle started')
-    sendNotifications('percentwise Starddle started')
+    logging.debug('Bank percentwise  started')
+    sendNotifications('Bank percentwise started')
     #while True:
     main()

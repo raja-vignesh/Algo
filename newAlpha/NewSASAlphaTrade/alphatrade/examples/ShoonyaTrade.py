@@ -123,7 +123,7 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,SLCorrection=False
                         modifiedSL = callSL
                     elif order.strikeType == StrikeType.PUT:
                         modifiedSL = putSL
-                elif SLCorrection == True and stratergy == 'MorningBNStraddle':
+                elif SLCorrection == True and ( stratergy == 'MorningBNStraddle' or stratergy == 'BankPercent' or stratergy== 'BankCPR' ):
                     if order.strikeType == StrikeType.CALL:
                         modifiedSL = callSL
                     elif order.strikeType == StrikeType.PUT:
