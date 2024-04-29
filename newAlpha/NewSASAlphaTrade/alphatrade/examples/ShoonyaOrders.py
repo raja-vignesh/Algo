@@ -345,11 +345,6 @@ def placeStopLossLimitOrder(sas,transactionType,quantity,instrument,price,order,
     global connection 
     connection = getConnectionObject()
     tradePrice = float(round(price,1))
-    sendNotifications('placeStopLossLimitOrder')
-    sendNotifications(order.indexType)
-    sendNotifications(transactionType)
-    sendNotifications(type(order.indexType))
-    sendNotifications(type(IndexType.BNIFTY))
 
     triggerPrice = 0.0
     if order.indexType == IndexType.BNIFTY:
@@ -366,7 +361,6 @@ def placeStopLossLimitOrder(sas,transactionType,quantity,instrument,price,order,
         elif transactionType == TransactionType.Sell:
             triggerPrice  = tradePrice + 0.3
     else:
-        sendNotifications('In Else')
         if transactionType == TransactionType.Buy:
             triggerPrice = tradePrice - 1.0
         elif transactionType == TransactionType.Sell:

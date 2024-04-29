@@ -673,7 +673,7 @@ def placeOrders():
     global sas
     global orders
     
-    placeStraddleOrders(sas,orders)
+    placeStraddleOrders(sas,shoonya,orders)
     sleep(1)
     placeStopOrders()
 

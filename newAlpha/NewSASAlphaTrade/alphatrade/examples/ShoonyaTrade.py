@@ -507,7 +507,6 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                     elif order.strikeType == StrikeType.PUT:
                         placeStraddleStopOders(sas,preparedOrders,BNPutSL,'BN Put reordered SL added')
                 else:
-                    sendNotifications('in else')
                     placeStraddleStopOders(sas,preparedOrders,0.25,'930Nifty reordered SL added')
         
         #To Modify SL at 2:30 PM to cost
