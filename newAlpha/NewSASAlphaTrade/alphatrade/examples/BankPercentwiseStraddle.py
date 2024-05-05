@@ -115,15 +115,19 @@ def open_socket():
     socket_opened = False
     
     
-    
+    sas.run_socket()
     order_placed = False
-
-    
-   
-
+    socket_opened = True
     setRefenceValues()
-    sas.subscribe(BankNifty_scrip, LiveFeedType.COMPACT)
-    sas.subscribe(BankNiftyFut_scrip, LiveFeedType.COMPACT)
+    instruments = [BankNiftyFut_scrip,BankNifty_scrip]
+    sas.subscribe_multiple_compact_marketdata(instruments) 
+    sleep(1)
+    response = sas.read_multiple_compact_marketdata()
+    
+    for resp in list(response.values()):
+        event_handler_quote_update(resp)
+        
+    sas.unsubscribe_multiple_compact_marketdata(instruments) 
 
     checkforTrade()
 
@@ -194,7 +198,6 @@ def checkforTrade():
             elif BNLTP < lowerReference:
                 lowerSlotOver = True 
                 sendNotifications('Lower Ref Trade')
-            #setRefenceValues()
             createOrder()
         pass
             
@@ -205,11 +208,13 @@ def createOrder():
     global ltp
     global BankNifty_scrip
     global BNLTP
+    global BNSpot
+    global BNFut
     global orders
     ## Added for ATM from OC##
     global instruments
     global strikePrices
-    
+    atmPremiumDifference = 100
     try:    
         current_ltp = BNLTP
         sendNotifications("Bank Nifty price is :: " + str(current_ltp))
@@ -219,9 +224,7 @@ def createOrder():
         while atmPremiumDifference > benchmarkDifference:
             sleep(3)
             BNLTP = (BNSpot + BNFut) / 2.0
-                
             
-                    
             ## Added for ATM from OC##
         
             try: 
@@ -314,41 +317,40 @@ def event_handler_quote_update(message):
     
     global BNSpot
     global BNFut
-    
-    ltp = message['ltp']
-    logging.debug('ltp' + str(ltp))
-    if  message['token'] == BankNifty_scrip.token:
+
+    ltp = message['last_traded_price'] * .01
+    if  message['instrument_token'] == BankNifty_scrip['instrumentToken']:
         BNSpot = ltp
-    elif message['token'] == BankNiftyFut_scrip.token:
+    elif  message['instrument_token'] == BankNiftyFut_scrip['instrumentToken']:
         BNFut = ltp
-    elif message['token'] == callATMOrder.instrumentToken:
+    elif  message['instrument_token'] == callATMOrder.instrumentToken:
         callATMOrder.ltp = ltp
-    elif message['token'] == putATMOrder.instrumentToken:
+    elif  message['instrument_token'] == putATMOrder.instrumentToken:
         putATMOrder.ltp = ltp
-    elif message['token'] == instruments[0].token:
-          premiums[0]= ltp
-    elif message['token'] == instruments[1].token:
-          premiums[1]= ltp
-    elif message['token'] == instruments[2].token:
-          premiums[2]= ltp
-    elif message['token'] == instruments[3].token:
-          premiums[3]= ltp
-    elif message['token'] == instruments[4].token:
-          premiums[4]= ltp
-    elif message['token'] == instruments[5].token:
-          premiums[5]= ltp
-    elif message['token'] == instruments[6].token:
-          premiums[6]= ltp
-    elif message['token'] == instruments[7].token:
-          premiums[7]= ltp
-    elif message['token'] == instruments[8].token:
-          premiums[8]= ltp
-    elif message['token'] == instruments[9].token:
-          premiums[9]= ltp
-    elif message['token'] == instruments[10].token:
-          premiums[10]= ltp
-    elif message['token'] == instruments[11].token:
-          premiums[11]= ltp
+    elif  message['instrument_token'] == instruments[0]['instrumentToken']:
+           premiums[0]= ltp
+    elif  message['instrument_token'] == instruments[1]['instrumentToken']:
+           premiums[1]= ltp
+    elif  message['instrument_token'] == instruments[2]['instrumentToken']:
+           premiums[2]= ltp
+    elif  message['instrument_token'] == instruments[3]['instrumentToken']:
+           premiums[3]= ltp
+    elif  message['instrument_token'] == instruments[4]['instrumentToken']:
+           premiums[4]= ltp
+    elif  message['instrument_token'] == instruments[5]['instrumentToken']:
+           premiums[5]= ltp
+    elif  message['instrument_token'] == instruments[6]['instrumentToken']:
+           premiums[6]= ltp
+    elif  message['instrument_token'] == instruments[7]['instrumentToken']:
+           premiums[7]= ltp
+    elif  message['instrument_token'] == instruments[8]['instrumentToken']:
+           premiums[8]= ltp
+    elif  message['instrument_token'] == instruments[9]['instrumentToken']:
+           premiums[9]= ltp
+    elif  message['instrument_token'] == instruments[10]['instrumentToken']:
+           premiums[10]= ltp
+    elif  message['instrument_token'] == instruments[11]['instrumentToken']:
+           premiums[11]= ltp
 
 def open_callback():
     global socket_opened
