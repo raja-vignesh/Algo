@@ -6,6 +6,9 @@ import os
 from datetime import datetime,timedelta
 import pandas as pd
 import numpy as np
+import pandas_ta as ta 
+import numpy as np
+
 
 sas = None
 holdings = None
@@ -26,6 +29,8 @@ def main():
             sleep(90)
             pass
     getHoldings()
+    readShortermHoldings()
+
 
 def getHoldings():
     response = sas.fetch_holdings({'client_id':'JA186'})
@@ -34,16 +39,22 @@ def getHoldings():
         holdingInstruments.append(holding['instrument_details'])
     sendNotifications(holdingInstruments)
     print(holdingInstruments)
-    readShortermHoldings()
+    checkTheTrend()
+
+def checkTheTrend():
     now = datetime.now()
     thirty_days_ago = now - timedelta(days=30)
     res = sas.get_historical_candles({'from': thirty_days_ago, 'to': datetime.now(),'token':11491 })
     ans = Supertrend(res)
-    supertrend = ans.iloc[-1]['Final Lowerband']
+    supertrend = ans.iloc[-1]['Supertrend']
     print(f'res {res}')
     print(f'ans {ans}')
     sendNotifications(f'st is {supertrend}')
     print(f'st is {supertrend}')
+
+
+
+
     
 def readShortermHoldings():
     global shorttermHoldings
@@ -114,6 +125,12 @@ def Supertrend(df, atr_period = 10, multiplier = 3):
         'Final Lowerband': final_lowerband,
         'Final Upperband': final_upperband
     }, index=df.index)
+
+
+
+
+
+
 
 if(__name__ == '__main__'):
     sendNotifications('SL checker started')
