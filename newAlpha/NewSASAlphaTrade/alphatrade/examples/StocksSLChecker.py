@@ -1,5 +1,6 @@
 from alphatrade import AlphaTrade, LiveFeedType,TransactionType,OrderType,ProductType
 from SendNotifications import sendNotifications
+from Orders import placeCNCMarketBuyOrders
 from SAS import createSession
 from time import sleep
 import os
@@ -8,10 +9,12 @@ import pandas as pd
 import numpy as np
 import pandas_ta as ta 
 import numpy as np
+import json
+import collections
 
 
 sas = None
-holdings = None
+holdings = []
 holdingInstruments = []
 shorttermHoldings = []
 # Get the path to the desktop
@@ -30,30 +33,42 @@ def main():
             pass
     getHoldings()
     readShortermHoldings()
+    checkAndPlaceOrder()
 
 
 def getHoldings():
+    global holdings
     response = sas.fetch_holdings({'client_id':'JA186'})
     holdings = response['data']['holdings']
     for holding in holdings:
         holdingInstruments.append(holding['instrument_details'])
     sendNotifications(holdingInstruments)
     print(holdingInstruments)
-    checkTheTrend()
 
-def checkTheTrend():
+def checkTheTrend(token):
     now = datetime.now()
-    thirty_days_ago = now - timedelta(days=30)
-    res = sas.get_historical_candles({'from': thirty_days_ago, 'to': datetime.now(),'token':11491 })
+    thirty_days_ago = now - timedelta(days=90)
+    res = sas.get_historical_candles({'from': thirty_days_ago, 'to': datetime.now(),'token':token })
     ans = Supertrend(res)
     supertrend = ans.iloc[-1]['Supertrend']
     print(f'res {res}')
     print(f'ans {ans}')
     sendNotifications(f'st is {supertrend}')
     print(f'st is {supertrend}')
+    return supertrend
 
-
-
+def checkAndPlaceOrder():
+    for holding in shorttermHoldings:
+        sendNotifications(holding)
+        trend = checkTheTrend(holding['instrument_token']) 
+        sendNotifications(f"{holding['trading_symbol']} trend ins {trend}")
+        if trend == False:
+            print('YESS')
+            for item in holdings:
+                print(item)
+                if (item["token"] == holding["instrument_token"]) and (item["trading_symbol"] == holding["trading_symbol"]):
+                    sendNotifications(f"quantity is {item['quantity']}")
+                    placeCNCMarketBuyOrders(sas,item['quantity'],item["token"],item["exchange"])
 
     
 def readShortermHoldings():
@@ -61,7 +76,8 @@ def readShortermHoldings():
     print(f'file path {file_path}')
     try:
         with open(file_path, 'r') as file:
-            shorttermHoldings = file.read()
+            txt = file.read()
+            shorttermHoldings = json.loads(txt, object_pairs_hook=collections.OrderedDict)
             print(shorttermHoldings)
             sendNotifications(shorttermHoldings)
     except FileNotFoundError:

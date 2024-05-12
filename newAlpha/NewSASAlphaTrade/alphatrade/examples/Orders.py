@@ -284,6 +284,46 @@ def placeMarketOrders(sas,transactionType,quantity,instrument,product_type = Pro
           placeMarketOrders(sas,transactionType,quantity,instrument,product_type = ProductType.Intraday)
   except Exception as e:
       sendNotifications(f'Place Market orders - {e}')
+
+def placeCNCMarketBuyOrders(sas,quantity,token,exchange):
+  global connection 
+  connection = getConnectionObject()
+  
+  data = {
+       "exchange": exchange,
+       "instrument_token": token,
+       "client_id": connection.clientID,
+       "order_type": OrderType.Market.value,
+       "amo": False,
+       "price": 0,
+       "quantity": quantity,
+       "disclosed_quantity": 0,
+       "validity": "DAY",
+       "product": 'CNC',
+       "order_side": "SELL",
+       "device": "web",
+       "user_order_id": token,
+       "trigger_price": 0,
+       "execution_type": None
+   }
+ 
+  try:
+      response = connection.cnxnObject.place_order(data)
+      if 'error_code' in response:
+          if response['error_code'] == 40010 or response['error_code'] == 40000:
+              sendNotifications(response['error_code'])
+              sendNotifications('Unauthorized exception placeMarketOrders')
+              raise ValueError
+      return response['data']['oms_order_id']
+  except ValueError:
+      if response['error_code'] == 40010:
+          reGenerateToken()
+          placeCNCMarketBuyOrders(sas,quantity,token,exchange)
+      elif response['error_code'] == 40000:
+          getProfileToActivateconnection()
+          placeCNCMarketBuyOrders(sas,quantity,token,exchange)
+  except Exception as e:
+      sendNotifications(f'SELL CNC Market orders - {e}')
  
 
 
