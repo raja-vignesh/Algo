@@ -25,6 +25,7 @@ def main():
     while True:
         order_update = sas.read_order_update_data()
         if(order_update):
+            sendNotifications("======================")
             sendNotifications(f'{order_update["login_id"]} is {order_update["order_status"]}')
     sendNotifications('ORDER CHECKER finised')
 
