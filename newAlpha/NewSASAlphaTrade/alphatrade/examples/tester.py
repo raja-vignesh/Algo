@@ -1,21 +1,33 @@
-from ShoonyaSession import createShoonyaSession 
+from alphatrade import AlphaTrade, LiveFeedType,TransactionType,OrderType,ProductType
+from SendNotifications import sendNotifications
+from Orders import placeCNCMarketBuyOrders
+from SAS import createSession
+from time import sleep
+import os
+from datetime import datetime,timedelta
 
-class ShoonyaAPITester:
-    def __init__(self):
-        self.shoonya_session = None
 
-    def test_shoonya_session_creation(self):
-        global shoonya
-        
-        try:
-            if self.shoonya_session is None:
-                self.shoonya_session = createShoonyaSession()
-                print("Shoonya session created successfully!")
-            else:
-                print("Shoonya session already exists.")
-        except Exception as e:
-            print("Error creating Shoonya session:", e)
 
-if __name__ == "__main__":
-    tester = ShoonyaAPITester()
-    tester.test_shoonya_session_creation()
+sas = None
+
+
+def main():
+    global sas
+    
+    while sas is None:
+        sas = createSession()
+        if sas == None:
+            sleep(90)
+            pass
+    ws_status = sas.run_socket()
+    print(ws_status)
+    sas.subscribe_order_update({'client_id': 'JA186'})
+    while True:
+        order_update = sas.read_order_update_data()
+        if(order_update):
+            sendNotifications(f'{order_update["login_id"]} is {order_update["order_status"]}')
+    sendNotifications('ORDER CHECKER finised')
+
+if(__name__ == '__main__'):
+    sendNotifications('ORDER CHECKER STARTED')
+    main()
