@@ -41,8 +41,6 @@ def getHoldings():
     holdings = response['data']['holdings']
     for holding in holdings:
         holdingInstruments.append(holding['instrument_details'])
-    sendNotifications(holdingInstruments)
-    print(holdingInstruments)
 
 def checkTheTrend(token):
     now = datetime.now()
@@ -50,21 +48,15 @@ def checkTheTrend(token):
     res = sas.get_historical_candles({'from': thirty_days_ago, 'to': datetime.now(),'token':token })
     ans = Supertrend(res)
     supertrend = ans.iloc[-1]['Supertrend']
-    print(f'res {res}')
-    print(f'ans {ans}')
     sendNotifications(f'st is {supertrend}')
-    print(f'st is {supertrend}')
     return supertrend
 
 def checkAndPlaceOrder():
     for holding in shorttermHoldings:
-        sendNotifications(holding)
         trend = checkTheTrend(holding['instrument_token']) 
         sendNotifications(f"{holding['trading_symbol']} trend ins {trend}")
         if trend == False:
-            print('YESS')
             for item in holdings:
-                print(item)
                 if (item["token"] == holding["instrument_token"]) and (item["trading_symbol"] == holding["trading_symbol"]):
                     sendNotifications(f"quantity is {item['quantity']}")
                     placeCNCMarketBuyOrders(sas,item['quantity'],item["token"],item["exchange"])
@@ -72,17 +64,15 @@ def checkAndPlaceOrder():
     
 def readShortermHoldings():
     global shorttermHoldings
-    print(f'file path {file_path}')
     try:
         with open(file_path, 'r') as file:
             txt = file.read()
             shorttermHoldings = json.loads(txt, object_pairs_hook=collections.OrderedDict)
-            print(shorttermHoldings)
             sendNotifications(shorttermHoldings)
     except FileNotFoundError:
-        print("The file 'holdings.txt' was not found.")
+        sendNotifications("The file 'holdings.txt' was not found.")
     except Exception as e:
-        print("An error occurred:", e)
+        sendNotifications("An error occurred:", e)
 
 def Supertrend(df, atr_period = 10, multiplier = 3):
     
