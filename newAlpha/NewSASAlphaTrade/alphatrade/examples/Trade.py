@@ -507,7 +507,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
     global preClosingSLModified
     sendNotifications(f'Watching stoporders {stratergy} with reentry')
     while tradeActive:
-        sleep(5)
+        sleep(15)
         filteredOrders = list(filter(lambda order:order.positionClosed == False,orders))
         
         
@@ -551,14 +551,15 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                     
                     if resp['instrument_token'] == order.instrumentToken:
                         order.ltp = resp['last_traded_price'] * .01
-                
+                order.orderStatus = getOrderHistory(sas,order.stoporderID,False)
+
                 if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
                     checkForMinimumValueAndClose(sas,order,orders)
                     
-                if (order.ltp > order.stoplossPrice and not order.positionClosed):
+                if (((order.ltp > order.stoplossPrice) or order.orderStatus == 'complete')  and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
-                    if (order.ltp > order.stoplossPrice and not order.positionClosed):
-                        order.orderStatus = getOrderHistory(sas,order.stoporderID)
+                    if (not order.positionClosed):
+                        #order.orderStatus = getOrderHistory(sas,order.stoporderID)
                         #print(status)
                         if order.strikeType == StrikeType.CALL:
                             sendNotifications(f'possible call slippage {stratergy}')
