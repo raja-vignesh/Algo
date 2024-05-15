@@ -47,6 +47,7 @@ def checkTheTrend(token):
     thirty_days_ago = now - timedelta(days=90)
     res = sas.get_historical_candles({'from': thirty_days_ago, 'to': datetime.now(),'token':token })
     ans = Supertrend(res)
+    print(ans)
     supertrend = ans.iloc[-1]['Supertrend']
     sendNotifications(f'st is {supertrend}')
     return supertrend
@@ -59,7 +60,7 @@ def checkAndPlaceOrder():
             for item in holdings:
                 if (item["token"] == holding["instrument_token"]) and (item["trading_symbol"] == holding["trading_symbol"]):
                     sendNotifications(f"quantity is {item['quantity']}")
-                    placeCNCMarketBuyOrders(sas,item['quantity'],item["token"],item["exchange"])
+                    #placeCNCMarketBuyOrders(sas,item['quantity'],item["token"],item["exchange"])
 
     
 def readShortermHoldings():
