@@ -105,11 +105,11 @@ def calculateMTM():
         sendNotifications('backup file deleted')
     else:
         sendNotifications("backup does not exist")
-    if os.path.exists("bn_sqoff.txt"):
-        os.remove("bn_sqoff.txt")
-        sendNotifications('bn_sqoff file deleted')
+    if os.path.exists("nifty_sqoff.txt"):
+        os.remove("nifty_sqoff.txt")
+        sendNotifications('nifty_sqoff file deleted')
     else:
-        sendNotifications("bn_sqoff does not exist")
+        sendNotifications("nifty_sqoff does not exist")
 
     
 if(__name__ == '__main__'):

@@ -28,6 +28,14 @@ putSL= 0.0
 modifiedSL= 0.0
 def placeStraddleOrders(sas,orders):
 
+    if os.path.exists('nifty_sqoff.txt'):
+        txt = readContentsofFile('nifty_sqoff.txt')
+        val = txt
+        sendNotifications(f'read value is {val}')
+        if (txt == "done"):
+            sendNotifications(f'Nifty Sqoff has already happened')
+            exit(0)
+
     for order in orders:
         print(order.indexType)
         order.orderID =  placeMarketOrders(sas,TransactionType.Sell,order.quantity,order.instrument)
@@ -83,7 +91,14 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,fullPremium=False,
     
     ExpiryCallSL = stoploss
     ExpiryPutSL = stoploss
-    
+
+    if os.path.exists('nifty_sqoff.txt'):
+        txt = readContentsofFile('nifty_sqoff.txt')
+        val = txt
+        sendNotifications(f'read value is {val}')
+        if (txt == "done"):
+            sendNotifications(f'Nifty Sqoff has already happened')
+            exit(0)
     try:
         for order in orders: 
             order.tradedPrice = getTradedPriceOfOrder(sas,order.orderID)
