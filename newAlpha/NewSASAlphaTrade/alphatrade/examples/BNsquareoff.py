@@ -104,7 +104,7 @@ def calculateMTM():
     global HALF_PROFIT_REACHED
     global HALF_PROFIT
     afterNoonSessionAdjusted = False
-    HALF_PROFIT = MAX_PROFIT / 2.0
+    #HALF_PROFIT = MAX_PROFIT / 2.0
     timer = 333
 
     # if (isExpiryTrades() == True):
@@ -141,7 +141,6 @@ def calculateMTM():
                             quantity = abs(position["net_quantity"]) / 50
                         mtm = mtm + (((position['average_sell_price'] - position['ltp']) * abs(position["net_quantity"])) + position['realized_mtm'])
         
-                
                 
             # if mtm >= HALF_PROFIT:
             #     timer = 150
@@ -193,6 +192,6 @@ def calculateMTM():
     sendNotifications(f'mtm of JA186 is {finalMTM}')
 
 if(__name__ == '__main__'):
-    sendNotifications('BN SquareOff monitoring started ' + str(datetime.datetime.now()))
+    sendNotifications('JA186 SquareOff monitoring started ' + str(datetime.datetime.now()))
     #while True:
     main()
