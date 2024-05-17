@@ -30,6 +30,14 @@ instruments = []
 
 def placeStraddleOrders(sas,shoonya,orders):
 
+    if os.path.exists('shoonya_sqoff.txt'):
+        txt = readContentsofFile('shoonya_sqoff.txt')
+        val = txt
+        sendNotifications(f'read value is {val}')
+        if (txt == "done"):
+            sendNotifications(f'shoonya Sqoff has already happened')
+            exit(0)
+
     for order in orders:
         order.orderID =  placeMarketOrders(shoonya,TransactionType.Sell,order.quantity,order.instrument)
         order.shoonyaToken = get_trading_symbol_by_token(order.instrument['instrumentToken'])
@@ -54,6 +62,14 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,SLCorrection=False
     BNCallSL = stoploss
     BNPutSL = stoploss
     sendNotifications('placeStraddleStopOders')
+
+    if os.path.exists('shoonya_sqoff.txt'):
+        txt = readContentsofFile('shoonya_sqoff.txt')
+        val = txt
+        sendNotifications(f'read value is {val}')
+        if (txt == "done"):
+            sendNotifications(f'shoonya Sqoff has already happened')
+            exit(0)
 
     try:
         for order in orders:
@@ -481,7 +497,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
     global preClosingSLModified
     sendNotifications(f'Watching stoporders {stratergy} with rentry')
     while tradeActive:
-        sleep(14)
+        sleep(15)
         filteredOrders = list(filter(lambda order:order.positionClosed == False,orders))
         
         
@@ -495,13 +511,10 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
             print(order)
             order.orderStatus = getOrderHistory(sas,order.orderID,False)
             if order.orderStatus.lower() == 'complete':
-                sendNotifications(f'{order.strike} {order.strikeType} {stratergy} reentered ') 
                 preparedOrders = []
                 preparedOrders.append(order)
-                sendNotifications(f'preparedOrders {preparedOrders}')
                 order.positionClosed = False
-                if (stratergy == 'MorningBNStraddle'):
-                    sendNotifications('in if')
+                if (stratergy == 'MorningBNStraddle' or stratergy =='BankCPR'):
                     if order.strikeType == StrikeType.CALL:
                         placeStraddleStopOders(sas,preparedOrders,BNCallSL,'BN call reordered SL added')
                     elif order.strikeType == StrikeType.PUT:
@@ -521,14 +534,13 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                 for resp in list(response.values()):
                     if resp['instrument_token'] == order.instrumentToken:
                         order.ltp = resp['last_traded_price'] * .01
-                
+                order.orderStatus = getOrderHistory(sas,order.orderID,False)
                 #if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
                 #    checkForMinimumValueAndClose(sas,order,orders)
                     
-                if (order.ltp > order.stoplossPrice and not order.positionClosed):
+                if (((order.ltp > order.stoplossPrice) or order.orderStatus.lower() == 'complete') and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
-                    if (order.ltp > order.stoplossPrice and not order.positionClosed):
-                        order.orderStatus = getOrderHistory(sas,order.stoporderID)
+                    if (not order.positionClosed):
                         #print(status)
                         if order.strikeType == StrikeType.CALL:
                             sendNotifications(f'possible call slippage {stratergy}')

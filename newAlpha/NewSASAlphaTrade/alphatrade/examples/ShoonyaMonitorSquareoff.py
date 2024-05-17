@@ -1,26 +1,33 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Aug 24 16:16:15 2021
+Created on Tue Oct 29 16:16:15 2021
 
 @author: Dhakshu
 """
 
 from time import sleep
-from datetime import date,time,timedelta
+from datetime import date,time
 import datetime
-from Orders import placeMarketOrders,placeStopLossMarketorder,getOrderHistory,getTradedPriceOfOrder,getPendingOrders,cancelOrder
 from ShoonyaOrders import getDaywisePositions,placeMOWithoutConversion
 from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
-#from alice_blue import LiveFeedType,TransactionType,OrderType,ProductType
-
+from strikes import getNiftyMaxLoss,getNiftyMaxProfit
 from SendNotifications import sendNotifications
-from SAS import createSession
+from SAS import createSession,reConnectSession
+from Common import isExpiryTrades,isExpiryDay,isPreExpiryDay,writeToTheFileWithContent
+import os
+import sys
 from ShoonyaSession import createShoonyaSession,getConnectionObject 
 
-import re
-import os
-connection = None 
-shoonya= None
+vix = 0
+
+sas = None
+
+MAX_PROFIT = getNiftyMaxProfit()
+MAX_LOSS = -2500
+shoonya = None
+HALF_PROFIT = 0.0
+HALF_PROFIT_REACHED = False
+
 def main():
     global shoonya
     while shoonya is None:
@@ -28,7 +35,7 @@ def main():
         if shoonya == None:
              sleep(90)
              pass
-    squareOff()
+    calculateMTM()      
     
     
 def squareOff():
@@ -44,7 +51,8 @@ def squareOff():
         if offid is not None:
             sendNotifications(f'Squared off with id {offid}')
     cancelPendingOrders()
-    calculateMTM(positions)
+    writeToTheFileWithContent("shoonya_sqoff.txt","done")
+    sendNotifications('shoonya_sqoff file created')
     
 def sqaureOffPosition(position):
     sas = None
@@ -82,31 +90,52 @@ def cancelPendingOrders():
             sendNotifications('Pendin orders cancelled ' + str(datetime.datetime.now()))
     
     sendNotifications('pending orders cancelled')
-
-def calculateMTM(positions):
-    sas = None
     
-    mtm = 0.0
-    openPositions = 0
-    for position in positions:
-        netQuantity = int(position['netqty'])
-        if (netQuantity == 0) and (position['s_prdt_ali'] == 'MIS'):
-            mtm =  mtm + float(position['rpnl'])    
-        elif (netQuantity != 0) and (position['s_prdt_ali'] == 'MIS'):
-            openPositions = openPositions + 1
-    sendNotifications(f'P/L for the day is {mtm}')
-    if openPositions > 0:
-        sendNotifications(f'Warning! {openPositions} still open')
-        
-    if os.path.exists("shoonya_sqoff.txt"):
-        os.remove("shoonya_sqoff.txt")
-        sendNotifications('shoonya_sqoff file deleted')
-    else:
-        sendNotifications("shoonya_sqoff does not exist")
 
+def calculateMTM():
+    global sas
+    global MAX_PROFIT
+    global MAX_LOSS
+    global HALF_WAY
+    global HALF_PROFIT_REACHED
+    global HALF_PROFIT
+    afterNoonSessionAdjusted = False
+    mtm = 0.0
+    timer = 333
+
+    
+    try:
+        while mtm > MAX_LOSS and datetime.datetime.now().time() <= time(15,15):
+            sleep(timer)
+            positions = getDaywisePositions(sas)
+            mtm = 0.0
+   
+            for position in positions:
+                netQuantity = int(position['netqty'])
+                if (netQuantity == 0) and (position['s_prdt_ali'] == 'MIS'):
+                    mtm =  mtm + float(position['rpnl'])    
+                elif (netQuantity != 0) and (position['s_prdt_ali'] == 'MIS'):
+                    openPositions = openPositions + 1
+            #sendNotifications(f'P/L is {mtm}')
+            
+            
+            pass 
+
+    except Exception as e:
+        sendNotifications(e)
+        sendNotifications("Unauthorised exception.. go for conn again calculateMTM")
+        sas = reConnectSession()
+        sleep(60)  
+        sendNotifications("Hopefully reconnected and going for recalculation")
+        calculateMTM()
+    
+    finalMTM = float(mtm)
+    if (datetime.datetime.now().time() <= time(15,15)):
+        squareOff()
+    sendNotifications(f'mtm of Nifty is {finalMTM}')
+    
     
 if(__name__ == '__main__'):
-    sendNotifications('SquareOff started' + str(datetime.datetime.now()))
+    sendNotifications('Shoonya SquareOff monitoring started ' + str(datetime.datetime.now()))
     #while True:
     main()
-    

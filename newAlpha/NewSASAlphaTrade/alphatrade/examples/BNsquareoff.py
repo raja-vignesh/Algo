@@ -188,7 +188,8 @@ def calculateMTM():
     # else:
     #     sendNotifications('Exiting squareoff')
     #     sys.exit()
-    squareOff()
+    if (datetime.datetime.now().time() <= time(15,15)):
+        squareOff()
     sendNotifications(f'mtm of JA186 is {finalMTM}')
 
 if(__name__ == '__main__'):
