@@ -138,37 +138,10 @@ def calculateMTM():
                         if position['symbol'] == 'BANKNIFTY':
                             quantity = abs(position["net_quantity"]) / 25
                         elif position['symbol'] == 'NIFTY':
-                            quantity = abs(position["net_quantity"]) / 50
+                            quantity = abs(position["net_quantity"]) / 25
                         mtm = mtm + (((position['average_sell_price'] - position['ltp']) * abs(position["net_quantity"])) + position['realized_mtm'])
-        
-                
-            # if mtm >= HALF_PROFIT:
-            #     timer = 150
-            #     HALF_PROFIT = HALF_PROFIT + 1000
-            #     sendNotifications(f'Half profit in BN updated to {HALF_PROFIT} and mtm is {mtm}')
-            #     if MAX_LOSS < 0.0:
-            #         MAX_LOSS = round((mtm * 0.25),1)
-            #         sendNotifications(f'Max loss updated to {MAX_LOSS} in BN')
-            #     else:
-            #         MAX_LOSS = MAX_LOSS + 1000
-            #         sendNotifications(f'Max loss updated to {MAX_LOSS} in BN')
-                
-            # if mtm >= (MAX_PROFIT * 1.99):
-            #     sendNotifications('Max loss updated to 1.99 times in BN')
-            #     MAX_LOSS = mtm    
-            # if  MAX_LOSS > 0.0 and datetime.datetime.now().time() >= time(14,20): 
-            #     if afterNoonSessionAdjusted == False:
-            #         afterNoonSessionAdjusted = True
-            #         sendNotifications(f'Max loss Adjusment, mtm is {mtm} and max loss is {MAX_LOSS}')
-            #         diff = mtm - MAX_LOSS
-            #         sendNotifications(f'Diff is {diff} in BN')
-            #         if diff > 0.0:
-            #             MAX_LOSS = MAX_LOSS + round((diff * 0.33),1)
-            #             sendNotifications(f'Max loss updated to {MAX_LOSS} in BN')  
-            # elif MAX_LOSS < 0.0 and mtm > 3000.0 and datetime.datetime.now().time() >= time(14,20):
-            #     MAX_LOSS = 0.0
-            #     sendNotifications('Max loss updated to 0 BN')    
-        pass 
+            sendNotifications(f'mtm is {mtm}')
+            pass 
 
     except Exception as e:
         sendNotifications(e)
