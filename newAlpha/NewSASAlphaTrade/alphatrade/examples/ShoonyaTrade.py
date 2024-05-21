@@ -508,7 +508,6 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
 
         for index,order in enumerate(triggerPendingOrders):
             sleep(1)
-            print(order)
             order.orderStatus = getOrderHistory(sas,order.orderID,False)
             if order.orderStatus.lower() == 'complete':
                 preparedOrders = []
@@ -534,7 +533,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                 for resp in list(response.values()):
                     if resp['instrument_token'] == order.instrumentToken:
                         order.ltp = resp['last_traded_price'] * .01
-                order.orderStatus = getOrderHistory(sas,order.orderID,False)
+                order.orderStatus = getOrderHistory(sas,order.stoporderID,False)
                 #if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
                 #    checkForMinimumValueAndClose(sas,order,orders)
                     
