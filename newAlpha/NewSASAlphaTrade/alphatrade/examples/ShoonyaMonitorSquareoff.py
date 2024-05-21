@@ -93,7 +93,7 @@ def cancelPendingOrders():
     
 
 def calculateMTM():
-    global sas
+    global shoonya
     global MAX_PROFIT
     global MAX_LOSS
     global HALF_WAY
@@ -114,9 +114,7 @@ def calculateMTM():
                 netQuantity = int(position['netqty'])
                 if (netQuantity == 0) and (position['s_prdt_ali'] == 'MIS'):
                     mtm =  mtm + float(position['rpnl'])    
-                elif (netQuantity != 0) and (position['s_prdt_ali'] == 'MIS'):
-                    openPositions = openPositions + 1
-            #sendNotifications(f'P/L is {mtm}')
+            sendNotifications(f'P/L is {mtm}')
             
             
             pass 
@@ -124,7 +122,7 @@ def calculateMTM():
     except Exception as e:
         sendNotifications(e)
         sendNotifications("Unauthorised exception.. go for conn again calculateMTM")
-        sas = reConnectSession()
+        shoonya = createShoonyaSession() 
         sleep(60)  
         sendNotifications("Hopefully reconnected and going for recalculation")
         calculateMTM()

@@ -26,6 +26,7 @@ instruments = []
 callSL = 0.0
 putSL= 0.0
 modifiedSL= 0.0
+canCheckStatus = False
 def placeStraddleOrders(sas,orders):
 
     if os.path.exists('nifty_sqoff.txt'):
@@ -520,7 +521,9 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
     
     modifiedstatus = False
     global preClosingSLModified
+    global canCheckStatus 
     sendNotifications(f'Watching stoporders {stratergy} with reentry')
+    last_order_history_check = datetime.datetime.now()
     while tradeActive:
         sleep(15)
         filteredOrders = list(filter(lambda order:order.positionClosed == False,orders))
@@ -532,7 +535,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
 
 
         for index,order in enumerate(triggerPendingOrders):
-            sleep(1)
+            sleep(5)
             
             order.orderStatus = getOrderHistory(sas,order.orderID,False)
             if order.orderStatus == 'complete':
@@ -550,15 +553,14 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                     sendNotifications(f'{order.strike} {order.strikeType} 930 BNStraddle  reentered and placing 0.25 stop') 
 
         
-        #To Modify SL at 2:30 PM to cost
-        #if datetime.datetime.now().time() >= time(14,30) and preClosingSLModified == False:
-            #sendNotifications(f'going to modify SLs {stratergy}')
-            #preClosingSLModified = True
-            #modifySLtoCost(sas,filteredOrders,stratergy)
-            #sendNotifications(f'SL modification completed {stratergy}')
         if datetime.datetime.now().time() >= time(15,15):
             sendNotifications(f'bye bye {stratergy} its 315')
             break
+        current_time = datetime.datetime.now()
+        if (current_time - last_order_history_check).total_seconds() >= 900:
+            sendNotifications(f'setted to True')
+            canCheckStatus = True
+
         try:
             for order in filteredOrders:
                 
@@ -566,7 +568,11 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                     
                     if resp['instrument_token'] == order.instrumentToken:
                         order.ltp = resp['last_traded_price'] * .01
-                order.orderStatus = getOrderHistory(sas,order.stoporderID,False)
+                
+                    if (canCheckStatus == True):
+                        order.orderStatus = getOrderHistory(sas,order.stoporderID,False)
+                        sendNotifications('checking order ')
+
 
                 if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
                     checkForMinimumValueAndClose(sas,order,orders)
@@ -574,7 +580,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                 if (((order.ltp > order.stoplossPrice) or order.orderStatus == 'complete')  and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
                     if (not order.positionClosed):
-                        #order.orderStatus = getOrderHistory(sas,order.stoporderID)
+                        order.orderStatus = getOrderHistory(sas,order.stoporderID)
                         #print(status)
                         if order.strikeType == StrikeType.CALL:
                             sendNotifications(f'possible call slippage {stratergy}')
@@ -622,7 +628,12 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                             squareOff(sas,order.instrument)
                         sendNotifications(f'Should have squared off.. watch {stratergy}')
                         checkPFSquareOffandUpdatePositionStatus(order,stratergy)
-                                
+            if ( canCheckStatus == True):
+                current_time = datetime.datetime.now()
+                last_order_history_check = current_time
+                canCheckStatus = False
+                sendNotifications(f'restted to False')
+                    
                                 
         except Exception as e:
             #if e.message == 'Request Unauthorised':
