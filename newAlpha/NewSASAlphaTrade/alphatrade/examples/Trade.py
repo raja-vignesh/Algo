@@ -571,7 +571,6 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                 
                     if (canCheckStatus == True):
                         order.orderStatus = getOrderHistory(sas,order.stoporderID,False)
-                        sendNotifications('checking order ')
 
 
                 if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:

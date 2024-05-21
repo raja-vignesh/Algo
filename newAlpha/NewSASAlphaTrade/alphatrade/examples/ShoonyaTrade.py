@@ -497,7 +497,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
     global preClosingSLModified
     sendNotifications(f'Watching stoporders {stratergy} with rentry')
     while tradeActive:
-        sleep(15)
+        sleep(20)
         filteredOrders = list(filter(lambda order:order.positionClosed == False,orders))
         
         
@@ -507,7 +507,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
 
 
         for index,order in enumerate(triggerPendingOrders):
-            sleep(1)
+            sleep(5)
             order.orderStatus = getOrderHistory(sas,order.orderID,False)
             if order.orderStatus.lower() == 'complete':
                 preparedOrders = []
