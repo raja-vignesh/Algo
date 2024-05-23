@@ -227,7 +227,7 @@ def open_socket():
             
     except Exception as exep :
         print(exep)
-        sendNotifications('something went wrong with order placement')
+        sendNotifications('something went wrong with order placement mrng nifty')
         logging.debug('something went wrong with order placement')
         sendNotifications(exep)
 
