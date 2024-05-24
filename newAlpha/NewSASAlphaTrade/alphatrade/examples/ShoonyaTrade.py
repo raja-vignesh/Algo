@@ -539,7 +539,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                 #if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
                 #    checkForMinimumValueAndClose(sas,order,orders)
                     
-                if (((order.ltp > order.stoplossPrice) or order.orderStatus.lower() == 'complete') and not order.positionClosed):
+                if (((order.ltp > order.stoplossPrice) or (order.orderStatus is not None and order.orderStatus.lower() == 'complete')) and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
                     if (not order.positionClosed):
                         #print(status)
