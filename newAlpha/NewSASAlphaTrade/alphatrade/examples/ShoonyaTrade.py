@@ -21,6 +21,7 @@ from AVSLModifier import modifySLtoCost
 from strikes import getNiftyStopLoss,getExpirySL
 from Common import readContentsofFile,isExpiryTrades,isBNExpiryDay,format_option_symbol
 import os
+canCheckStatus = False
 
 preClosingSLModified = False 
 BNCallSL = 0.0
@@ -495,6 +496,9 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
     
     modifiedstatus = False
     global preClosingSLModified
+    global canCheckStatus 
+    last_order_history_check = datetime.datetime.now()
+
     sendNotifications(f'Watching stoporders {stratergy} with rentry')
     while tradeActive:
         sleep(20)
@@ -521,19 +525,17 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                 else:
                     placeStraddleStopOders(sas,preparedOrders,0.25,'930Nifty reordered SL added')
         
-        #To Modify SL at 2:30 PM to cost
-        #if datetime.datetime.now().time() >= time(14,10) and preClosingSLModified == False:
-        #    sendNotifications(f'going to modify SLs {stratergy}')
-        #    preClosingSLModified = True
-        #    modifySLtoCost(sas,filteredOrders,stratergy)
-        #    sendNotifications(f'SL modification completed {stratergy}')
+        current_time = datetime.datetime.now()
+        if (current_time - last_order_history_check).total_seconds() >= 900:
+            canCheckStatus = True
         try:
             for order in filteredOrders:
                 
                 for resp in list(response.values()):
                     if resp['instrument_token'] == order.instrumentToken:
                         order.ltp = resp['last_traded_price'] * .01
-                order.orderStatus = getOrderHistory(sas,order.stoporderID,False)
+                if (canCheckStatus == True):
+                    order.orderStatus = getOrderHistory(sas,order.stoporderID,False)
                 #if order.ltp < 10.0 and isExpiryDay() == True and not order.positionClosed:
                 #    checkForMinimumValueAndClose(sas,order,orders)
                     
@@ -541,6 +543,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                     sendNotifications(f'Checking {stratergy}')
                     if (not order.positionClosed):
                         #print(status)
+                        order.orderStatus = getOrderHistory(sas,order.stoporderID)
                         if order.strikeType == StrikeType.CALL:
                             sendNotifications(f'possible call slippage {stratergy}')
                         else:
@@ -588,7 +591,11 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                         sendNotifications(f'Should have squared off.. watch {stratergy}')
                         checkPFSquareOffandUpdatePositionStatus(order,stratergy)
                                 
-                                
+                if ( canCheckStatus == True):
+                    current_time = datetime.datetime.now()
+                    last_order_history_check = current_time
+                    canCheckStatus = False
+                    sendNotifications(f'restted to False')                
         except Exception as e:
             #if e.message == 'Request Unauthorised':
                 sendNotifications(e)

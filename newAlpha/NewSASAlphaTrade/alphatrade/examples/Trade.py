@@ -558,7 +558,6 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
             break
         current_time = datetime.datetime.now()
         if (current_time - last_order_history_check).total_seconds() >= 900:
-            sendNotifications(f'setted to True')
             canCheckStatus = True
 
         try:
@@ -631,7 +630,6 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                 current_time = datetime.datetime.now()
                 last_order_history_check = current_time
                 canCheckStatus = False
-                sendNotifications(f'restted to False')
                     
                                 
         except Exception as e:
