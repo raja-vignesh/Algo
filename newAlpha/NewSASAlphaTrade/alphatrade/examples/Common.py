@@ -9,7 +9,7 @@ import datetime
 import os
 import re
 from alphatrade import TransactionType
-
+import csv
 #Mon 0 
 #Tue 1
 #Wed 2
@@ -129,6 +129,29 @@ def niftyAcceptedDifference():
     return 8.0
 
 
+
+def write_pl_to_csv(pl,index, filename='daily_pl.csv'):
+    abs_path = os.path.abspath(filename)
+    
+    date = datetime.datetime.now().strftime('%Y-%m-%d')
+    data = [date, index, pl]
+    
+    # Check if file exists
+    file_exists = os.path.isfile(abs_path)
+    
+    try:
+        # Open the file in append mode
+        with open(abs_path, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            # Write header if file does not exist
+            if not file_exists:
+                writer.writerow(['Date', 'Index', 'P/L'])
+            # Write the data
+            writer.writerow(data)
+    except PermissionError as e:
+        print(f"Permission error: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 def format_option_symbol(option_symbol):

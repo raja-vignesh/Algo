@@ -14,7 +14,7 @@ from SendNotifications import sendNotifications
 from SAS import createSession
 import re
 import os
-
+from Common import write_pl_to_csv
 sas = None
 
 def main():
@@ -94,17 +94,15 @@ def calculateMTM():
     sendNotifications(f'P/L for the day is {mtm}')
     if openPositions > 0:
         sendNotifications(f'Warning! {openPositions} still open')
+
+    write_pl_to_csv(mtm,'Nifty')
     
     if os.path.exists("NiftyLTP.txt"):
         os.remove("NiftyLTP.txt")
         sendNotifications('Nifty file deleted')
     else:
         sendNotifications("The 920 does not exist")
-    if os.path.exists("backup.txt"):
-        os.remove("backup.txt")
-        sendNotifications('backup file deleted')
-    else:
-        sendNotifications("backup does not exist")
+    
     if os.path.exists("nifty_sqoff.txt"):
         os.remove("nifty_sqoff.txt")
         sendNotifications('nifty_sqoff file deleted')

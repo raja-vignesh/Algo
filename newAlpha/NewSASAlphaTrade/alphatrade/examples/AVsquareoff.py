@@ -16,6 +16,7 @@ from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
 from SendNotifications import sendNotifications
 from SAS import createSession
 from ShoonyaSession import createShoonyaSession,getConnectionObject 
+from Common import write_pl_to_csv
 
 import re
 import os
@@ -97,7 +98,7 @@ def calculateMTM(positions):
     sendNotifications(f'P/L for the day is {mtm}')
     if openPositions > 0:
         sendNotifications(f'Warning! {openPositions} still open')
-        
+    write_pl_to_csv(mtm,'Bank')    
     if os.path.exists("shoonya_sqoff.txt"):
         os.remove("shoonya_sqoff.txt")
         sendNotifications('shoonya_sqoff file deleted')

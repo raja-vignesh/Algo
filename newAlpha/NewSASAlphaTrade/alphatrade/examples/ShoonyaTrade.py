@@ -91,7 +91,6 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,SLCorrection=False
             combinedPrice = combinedPrice + order.tradedPrice
             sendNotifications(f'Combined price is {combinedPrice}')
         if SLCorrection == True:
-            sendNotifications('SL correction')
             sendNotifications(f'call prem is {callCombinedPrice} put prem is {putCombinedPrice}')
             if callCombinedPrice > putCombinedPrice:
                 sendNotifications("call prem is higher")

@@ -262,7 +262,6 @@ class SellOrder(Order):
 def placeMarketOrders(shoonya,transactionType,quantity,instrument,product_type = ProductType.Intraday):
   global connection 
   connection = getConnectionObject()
-  sendNotifications('placeMarketOrders')
 
   try:
       response = connection.place_order(buy_or_sell=convert_transaction_type(transactionType),exchange='NFO',product_type='I',quantity=15,
@@ -294,7 +293,6 @@ def placeMarketOrders(shoonya,transactionType,quantity,instrument,product_type =
 def placeMOWithoutConversion(shoonya,transactionType,quantity,instrument,product_type = ProductType.Intraday):
   global connection 
   connection = getConnectionObject()
-  sendNotifications('placeMarketOrders')
   sendNotifications(f'connection {connection}')
 
   try:

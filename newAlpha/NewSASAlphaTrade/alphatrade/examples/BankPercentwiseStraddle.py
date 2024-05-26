@@ -253,7 +253,7 @@ def createOrder():
                     if index%2 == 0:
                         differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
                 
-                sendNotifications(f'premiums {differentialPremiums}')
+                #sendNotifications(f'premiums {differentialPremiums}')
 
                 index_min = np.argmin(differentialPremiums)
                 atmPremiumDifference = differentialPremiums[index_min]
@@ -279,7 +279,6 @@ def createOrder():
                     sendNotifications(f"ATM for options is {atm}")
                     
                     strikes = getBankNiftyStrikes(current_ltp)
-                    sendNotifications(f"ATM old averaging {strikes}")
             else:
                     callATMOrder.strike,putATMOrder.strike = getBankNiftyStrikes(current_ltp),getBankNiftyStrikes(current_ltp)
                     sendNotifications(f"ATM from calc is {callATMOrder.strike}")

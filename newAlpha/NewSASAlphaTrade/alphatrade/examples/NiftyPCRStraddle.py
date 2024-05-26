@@ -255,7 +255,7 @@ def open_socket():
                     
                     index_min = np.argmin(differentialPremiums)
                     
-                    sendNotifications(f'premiums {differentialPremiums}')
+                    #sendNotifications(f'premiums {differentialPremiums}')
                     atm = strikePrices[index_min]
                     atmPremiumDifference = differentialPremiums[index_min]
                     sendNotifications(f'Nifty ATM prem diff {atmPremiumDifference} and waiting')

@@ -233,7 +233,7 @@ def createOrder():
                         differentialPremiums.append(abs(float(premiums[index]) - float(premiums[index + 1])))
                 
                 sendNotifications(f'strikes {strikePrices}')
-                sendNotifications(f'premiums {differentialPremiums}')
+                #sendNotifications(f'premiums {differentialPremiums}')
                 index_min = np.argmin(differentialPremiums)
                 atm = strikePrices[index_min]
                 atmPremiumDifference = differentialPremiums[index_min]
