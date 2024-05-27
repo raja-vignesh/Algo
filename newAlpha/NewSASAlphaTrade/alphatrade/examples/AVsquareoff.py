@@ -95,6 +95,7 @@ def calculateMTM(positions):
             mtm =  mtm + float(position['rpnl'])    
         elif (netQuantity != 0) and (position['s_prdt_ali'] == 'MIS'):
             openPositions = openPositions + 1
+            mtm =  mtm + float(position['urmtom'])
     sendNotifications(f'P/L for the day is {mtm}')
     if openPositions > 0:
         sendNotifications(f'Warning! {openPositions} still open')

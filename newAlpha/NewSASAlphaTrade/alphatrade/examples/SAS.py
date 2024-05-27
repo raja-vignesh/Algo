@@ -42,7 +42,6 @@ def createSession(account = USER_CH):
                 cnxnObject.set_access_token(keyring.get_password(USER_CH,"token"))
                 clientID = keyring.get_password(USER_CH,"username")
                 currentSession = account
-                sendNotifications(f'{USER_CH} sas connection started {cnxnObject}')
                 # cnxnObject.run_socket()
                 # cnxnObject.subscribe_compact_marketdata({'exchangeCode': 1, 'instrumentToken': 26009})
                 # sleep(2)
@@ -53,9 +52,6 @@ def createSession(account = USER_CH):
                 # sleep(2)
                 # detailed_market_data = cnxnObject.read_detailed_marketdata()
                 # print(detailed_market_data['last_traded_price'])
-
-                print("In Ch")
-
             elif account == USER_RA:
                 cnxnObject = Connect(keyring.get_password(USER_RA,"username"),clientSecret,redirectURL,sasURL)
                 cnxnObject.set_access_token(keyring.get_password(USER_RA,"token"))

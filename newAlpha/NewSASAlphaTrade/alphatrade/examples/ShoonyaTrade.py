@@ -540,9 +540,9 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                     
                 if (((order.ltp > order.stoplossPrice) or (order.orderStatus is not None and order.orderStatus.lower() == 'complete')) and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
+                    order.orderStatus = getOrderHistory(sas,order.stoporderID)
                     if (not order.positionClosed):
                         #print(status)
-                        order.orderStatus = getOrderHistory(sas,order.stoporderID)
                         if order.strikeType == StrikeType.CALL:
                             sendNotifications(f'possible call slippage {stratergy}')
                         else:

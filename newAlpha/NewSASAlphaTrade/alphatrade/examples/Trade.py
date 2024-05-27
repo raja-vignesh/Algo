@@ -525,13 +525,9 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
     last_order_history_check = datetime.datetime.now()
     while tradeActive:
         sleep(15)
-        filteredOrders = list(filter(lambda order:order.positionClosed == False,orders))
-        
-        
+        filteredOrders = list(filter(lambda order:order.positionClosed == False,orders))   
         triggerPendingOrders = list(filter(lambda order:order.positionClosed == True,orders))
-     
         response = sas.read_multiple_compact_marketdata()
-
 
         for index,order in enumerate(triggerPendingOrders):
             sleep(5)
@@ -576,8 +572,8 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                     
                 if (((order.ltp > order.stoplossPrice) or order.orderStatus == 'complete')  and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
+                    order.orderStatus = getOrderHistory(sas,order.stoporderID)
                     if (not order.positionClosed):
-                        order.orderStatus = getOrderHistory(sas,order.stoporderID)
                         #print(status)
                         if order.strikeType == StrikeType.CALL:
                             sendNotifications(f'possible call slippage {stratergy}')
