@@ -95,7 +95,7 @@ def calculateMTM():
     if openPositions > 0:
         sendNotifications(f'Warning! {openPositions} still open')
 
-    write_pl_to_csv(mtm,'Nifty')
+    write_pl_to_csv(round(mtm),'Nifty')
     
     if os.path.exists("NiftyLTP.txt"):
         os.remove("NiftyLTP.txt")
