@@ -572,6 +572,9 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                     
                 if (((order.ltp > order.stoplossPrice) or order.orderStatus == 'complete')  and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
+                    sendNotifications(f'order.ltp {order.ltp}')
+                    sendNotifications(f'order.stoplossPrice {order.stoplossPrice}')
+                    sendNotifications(f'order.orderStatus {order.orderStatus}')
                     order.orderStatus = getOrderHistory(sas,order.stoporderID)
                     if (not order.positionClosed):
                         #print(status)
@@ -596,31 +599,31 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                                     order.orderID =  placeStopLossLimitOrder(sas,TransactionType.Sell,order.quantity,order.instrument,order.tradedPrice,order)
                                     sendNotifications(f'put reordered {order.orderID}') 
                             
-                    if order.orderStatus == 'trigger pending' or order.orderStatus == 'open' :
-                       newStopPrice = 0.0
-                       sendNotifications(f"possible freak trade {stratergy},watch it. Status is pending")
-                       sleep(15)
-                       sendNotifications(f"Going for trade after 15 secs {stratergy}")
-                       if order.ltp > order.stoplossPrice:
-                           order.orderStatus = getOrderHistory(sas,order.stoporderID)
-                           if ( order.orderStatus == 'trigger pending' or order.orderStatus == 'open'):
-                               newStopPrice = order.ltp
-                               modifiedstatus = modifyOrder(sas,TransactionType.Buy,order.instrument,order.stoporderID,order.ltp,order.quantity)
-                           else:
-                               sendNotifications(f"Pending trade not found {stratergy}")
-                       if modifiedstatus == True:
-                           order.stoplossPrice = newStopPrice
-                           sendNotifications(f'SL order {order.strike} modified {newStopPrice} {stratergy}')
-                       else:
-                           sendNotifications(f'SL Modification failed {stratergy}')
-                    elif order.orderStatus == 'cancelled':
-                        sendNotifications(f"possible freak trade {stratergy},watch it and Order got cancelled")
-                        sleep(15)
-                        sendNotifications(f"Going for trade after 15 secs {stratergy}")
-                        if order.ltp > order.stoplossPrice:
-                            squareOff(sas,order.instrument)
-                        sendNotifications(f'Should have squared off.. watch {stratergy}')
-                        checkPFSquareOffandUpdatePositionStatus(order,stratergy)
+                        elif order.orderStatus == 'trigger pending' or order.orderStatus == 'open' :
+                            newStopPrice = 0.0
+                            sendNotifications(f"possible freak trade {stratergy},watch it. Status is pending")
+                            sleep(15)
+                            sendNotifications(f"Going for trade after 15 secs {stratergy}")
+                            if order.ltp > order.stoplossPrice:
+                                order.orderStatus = getOrderHistory(sas,order.stoporderID)
+                                if ( order.orderStatus == 'trigger pending' or order.orderStatus == 'open'):
+                                    newStopPrice = order.ltp
+                                    modifiedstatus = modifyOrder(sas,TransactionType.Buy,order.instrument,order.stoporderID,order.ltp,order.quantity)
+                                else:
+                                    sendNotifications(f"Pending trade not found {stratergy}")
+                            if modifiedstatus == True:
+                                order.stoplossPrice = newStopPrice
+                                sendNotifications(f'SL order {order.strike} modified {newStopPrice} {stratergy}')
+                            else:
+                                sendNotifications(f'SL Modification failed {stratergy}')
+                        elif order.orderStatus == 'cancelled':
+                            sendNotifications(f"possible freak trade {stratergy},watch it and Order got cancelled")
+                            sleep(15)
+                            sendNotifications(f"Going for trade after 15 secs {stratergy}")
+                            if order.ltp > order.stoplossPrice:
+                                squareOff(sas,order.instrument)
+                            sendNotifications(f'Should have squared off.. watch {stratergy}')
+                            checkPFSquareOffandUpdatePositionStatus(order,stratergy)
             if ( canCheckStatus == True):
                 current_time = datetime.datetime.now()
                 last_order_history_check = current_time
