@@ -111,9 +111,12 @@ def calculateMTM():
             mtm = 0.0
    
             for position in positions:
+                #print(positions)
                 netQuantity = int(position['netqty'])
                 if (netQuantity == 0) and (position['s_prdt_ali'] == 'MIS'):
-                    mtm =  mtm + float(position['rpnl'])    
+                    mtm =  mtm + float(position['rpnl']) 
+                elif (netQuantity != 0) and (position['s_prdt_ali'] == 'MIS'):
+                   mtm =  mtm + float(position['urmtom'])     
             sendNotifications(f'P/L is {mtm}')
             
             
