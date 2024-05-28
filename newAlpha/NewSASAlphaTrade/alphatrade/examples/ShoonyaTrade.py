@@ -599,7 +599,6 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                     current_time = datetime.datetime.now()
                     last_order_history_check = current_time
                     canCheckStatus = False
-                    sendNotifications(f'restted to False')                
         except Exception as e:
             #if e.message == 'Request Unauthorised':
                 sendNotifications(e)

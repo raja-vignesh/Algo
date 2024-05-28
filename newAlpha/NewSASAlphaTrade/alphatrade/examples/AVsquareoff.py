@@ -99,12 +99,14 @@ def calculateMTM(positions):
     sendNotifications(f'P/L for the day is {mtm}')
     if openPositions > 0:
         sendNotifications(f'Warning! {openPositions} still open')
-    write_pl_to_csv(round(mtm),'Bank')    
     if os.path.exists("shoonya_sqoff.txt"):
         os.remove("shoonya_sqoff.txt")
         sendNotifications('shoonya_sqoff file deleted')
     else:
         sendNotifications("shoonya_sqoff does not exist")
+    sleep(300)
+    write_pl_to_csv(round(mtm),'Bank')    
+
 
     
 if(__name__ == '__main__'):

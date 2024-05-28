@@ -12,7 +12,7 @@ sas = None
 
 
 def main():
-    # global sas
+     global sas
     
     # while sas is None:
     #     sas = createSession()
@@ -28,7 +28,7 @@ def main():
     #         sendNotifications("======================")
     #         sendNotifications(f'{order_update["login_id"]} is {order_update["order_status"]}')
     # sendNotifications('ORDER CHECKER finised')
-    write_pl_to_csv(500,'Nifty')
+    #write_pl_to_csv(500,'Nifty')
 
 if(__name__ == '__main__'):
     sendNotifications('ORDER CHECKER STARTED')
