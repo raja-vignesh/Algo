@@ -521,6 +521,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                         placeStraddleStopOders(sas,preparedOrders,BNCallSL,'BN call reordered SL added')
                     elif order.strikeType == StrikeType.PUT:
                         placeStraddleStopOders(sas,preparedOrders,BNPutSL,'BN Put reordered SL added')
+                    order.orderStatus = 'trigger_pending'
                 else:
                     placeStraddleStopOders(sas,preparedOrders,0.25,'930Nifty reordered SL added')
         
