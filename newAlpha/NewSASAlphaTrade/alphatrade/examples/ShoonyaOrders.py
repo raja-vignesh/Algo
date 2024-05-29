@@ -364,8 +364,8 @@ def placeStopLossLimitOrder(sas,transactionType,quantity,instrument,price,order,
         elif transactionType == TransactionType.Sell:
             triggerPrice  = tradePrice + 1.0
             
-    sendNotifications(f'triggerPrice  {triggerPrice}')
-    sendNotifications(f'tradePrice  {tradePrice}')
+    #sendNotifications(f'triggerPrice  {triggerPrice}')
+    #sendNotifications(f'tradePrice  {tradePrice}')
 
          
     try:

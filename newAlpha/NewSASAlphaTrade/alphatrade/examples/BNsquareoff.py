@@ -140,7 +140,7 @@ def calculateMTM():
                         elif position['symbol'] == 'NIFTY':
                             quantity = abs(position["net_quantity"]) / 25
                         mtm = mtm + (((position['average_sell_price'] - position['ltp']) * abs(position["net_quantity"])) + position['realized_mtm'])
-            sendNotifications(f'mtm is {mtm}')
+            #sendNotifications(f'mtm is {mtm}')
             pass 
 
     except Exception as e:

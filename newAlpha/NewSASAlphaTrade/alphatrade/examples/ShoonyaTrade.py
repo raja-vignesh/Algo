@@ -542,10 +542,6 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                 if (((order.ltp > order.stoplossPrice) or (order.orderStatus is not None and order.orderStatus.lower() == 'complete')) and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
                     order.orderStatus = getOrderHistory(sas,order.stoporderID)
-                    sendNotifications(f'order.ltp {order.ltp}')
-                    sendNotifications(f'order.stoplossPrice {order.stoplossPrice}')
-                    sendNotifications(f'order.orderStatus {order.orderStatus}')
-
                     if (not order.positionClosed):
                         #print(status)
                         if order.strikeType == StrikeType.CALL:
@@ -557,14 +553,14 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                             if order.strikeType == StrikeType.CALL:
                                 sendNotifications(f'call order completed no slippage {stratergy}')
                                 if reentry == True:
-                                    sendNotifications(f'reordering call {stratergy}')
+                                    #sendNotifications(f'reordering call {stratergy}')
                                     order.orderID =  placeStopLossLimitOrder(sas,TransactionType.Sell,order.quantity,order.instrument,order.tradedPrice,order)
                                     sendNotifications(f'call reordered {order.orderID}')
                 
                             else:
                                 sendNotifications(f'put order completed no slippage {stratergy}')
                                 if reentry == True:
-                                    sendNotifications(f'reordering put {stratergy}')
+                                    #sendNotifications(f'reordering put {stratergy}')
                                     order.orderID =  placeStopLossLimitOrder(sas,TransactionType.Sell,order.quantity,order.instrument,order.tradedPrice,order)
                                     sendNotifications(f'put reordered {order.orderID}') 
                             #sas.unsubscribe(order.instrument, LiveFeedType.COMPACT)

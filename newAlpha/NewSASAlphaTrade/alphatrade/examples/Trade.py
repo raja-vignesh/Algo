@@ -573,9 +573,6 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                     
                 if (((order.ltp > order.stoplossPrice) or order.orderStatus == 'complete')  and not order.positionClosed):
                     sendNotifications(f'Checking {stratergy}')
-                    sendNotifications(f'order.ltp {order.ltp}')
-                    sendNotifications(f'order.stoplossPrice {order.stoplossPrice}')
-                    sendNotifications(f'order.orderStatus {order.orderStatus}')
                     order.orderStatus = getOrderHistory(sas,order.stoporderID)
                     if (not order.positionClosed):
                         #print(status)
@@ -588,7 +585,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                             if order.strikeType == StrikeType.CALL:
                                 sendNotifications(f'call order completed no slippage {stratergy}')
                                 if reentry == True:
-                                    sendNotifications(f'reordering call {stratergy}')
+                                    #sendNotifications(f'reordering call {stratergy}')
                                     #callOrderToberentered = list(filter(lambda order:order.positionClosed == True and order.strikeType == StrikeType.CALL,orders))
                                     order.orderID =  placeStopLossLimitOrder(sas,TransactionType.Sell,order.quantity,order.instrument,order.tradedPrice,order)
                                     sendNotifications(f'call reordered {order.orderID}')
@@ -596,7 +593,7 @@ def watchStraddleStopOrdersReentry(sas,orders,tradeActive,stratergy=None,SLModif
                             else:
                                 sendNotifications(f'put order completed no slippage {stratergy}')
                                 if reentry == True:
-                                    sendNotifications(f'reordering put {stratergy}')
+                                    #sendNotifications(f'reordering put {stratergy}')
                                     order.orderID =  placeStopLossLimitOrder(sas,TransactionType.Sell,order.quantity,order.instrument,order.tradedPrice,order)
                                     sendNotifications(f'put reordered {order.orderID}') 
                             
