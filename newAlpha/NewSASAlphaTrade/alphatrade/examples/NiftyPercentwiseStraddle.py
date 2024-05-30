@@ -104,7 +104,7 @@ def open_socket():
     sas.run_socket()
     socket_opened = True
     instruments = [Nifty_FutScrip,Nifty_scrip]
-    sendNotifications(instruments)
+    #sendNotifications(instruments)
     sas.subscribe_multiple_compact_marketdata(instruments)
     sleep(3) 
     response = sas.read_multiple_compact_marketdata()
@@ -138,9 +138,9 @@ def setRefenceValues():
         
         if os.path.exists('NiftyLTP.txt'):
             txt = readContentsofFile('NiftyLTP.txt')
-            sendNotifications(txt)
+            #sendNotifications(txt)
             val = float(txt)
-            sendNotifications(val)
+            #sendNotifications(val)
 
             sendNotifications(f'read value is {val}')
             referenceValue = val

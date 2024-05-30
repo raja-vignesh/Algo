@@ -44,7 +44,7 @@ def placeStraddleOrders(sas,orders):
     for order in orders:    
        sendNotifications(f'Sold with {order.orderID }')  
     
-    sendNotifications('Place straddle orders success')  
+    #sendNotifications('Place straddle orders success')  
     
     
 def placeConditionalSLLOrders(sas,orders,SL= 0.1):
@@ -167,7 +167,7 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,fullPremium=False,
                 elif order.strikeType == StrikeType.PUT:
                     modifiedSL = putSL
                 order.stoplossPrice = float(order.tradedPrice) + (float(order.tradedPrice) * modifiedSL)   
-                sendNotifications("Nifty modified SL")           
+                #sendNotifications("Nifty modified SL")           
             elif order.indexType == IndexType.NIFTY and stratergy == 'Morning920NiftyStraddle':
                 modifiedSL = getNiftyStopLoss(combinedPrice,stoploss)
                 order.stoplossPrice = float(order.tradedPrice) + (float(order.tradedPrice) * modifiedSL)
@@ -187,7 +187,7 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,fullPremium=False,
                     elif order.strikeType == StrikeType.PUT:
                         modifiedSL = putSL
                 order.stoplossPrice = float(order.tradedPrice) + (float(order.tradedPrice) * stoploss)
-                sendNotifications("Print 5")
+                #sendNotifications("Print 5")
             sendNotifications(f'SL of {order.strike} {order.strikeType} is {order.stoplossPrice}')
             sendNotifications(f'Modified SL {modifiedSL}')
             order.stoporderID = placeStopLossLimitOrder(sas,TransactionType.Buy,order.quantity,order.instrument,round(order.stoplossPrice, 1),order)

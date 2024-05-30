@@ -46,7 +46,7 @@ def placeStraddleOrders(sas,shoonya,orders):
     for order in orders:    
        sendNotifications(f'Sold with {order.orderID }')  
     
-    sendNotifications('Place straddle orders success')  
+    #sendNotifications('Place straddle orders success')  
           
 
 
@@ -145,7 +145,7 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,SLCorrection=False
                     elif order.strikeType == StrikeType.PUT:
                         modifiedSL = putSL
                     order.stoplossPrice = float(order.tradedPrice) + (float(order.tradedPrice) * modifiedSL)   
-                    sendNotifications("BN modified SL") 
+                    #sendNotifications("BN modified SL") 
                     sendNotifications(f'Modified SL {modifiedSL}')
                 else:
                     modifiedSL = stoploss

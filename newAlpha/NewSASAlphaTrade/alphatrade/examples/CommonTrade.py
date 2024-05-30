@@ -30,7 +30,7 @@ def placeStraddleOrders(sas,orders):
     for order in orders:    
        sendNotifications(f'Sold with {order.orderID }')  
     
-    sendNotifications('Place straddle orders success')  
+    #sendNotifications('Place straddle orders success')  
     
 def placeStraddleStopOders(sas,orders,stoploss,stratergy=None):
     combinedPrice = 0.0
