@@ -193,7 +193,7 @@ def getBN930Stoploss():
     elif day == 1:
         return .23
     else:
-        return .21
+        return .2
     
 def getBNExpiryTradesStoploss():
     if isExpiryDay() == True:
