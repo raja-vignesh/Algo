@@ -22,7 +22,7 @@ import sys
 sas = None
 
 #MAX_PROFIT = 14000.0
-MAX_LOSS = -3500.0
+MAX_LOSS = -3600.0
 vix = 0
 HALF_PROFIT = 0.0
 HALF_PROFIT_REACHED = False
