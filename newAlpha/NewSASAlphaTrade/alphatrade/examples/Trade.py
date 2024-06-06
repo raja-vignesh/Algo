@@ -16,7 +16,7 @@ import logging
 from SAS import createSession,reConnectSession
 from SLModifier import modifySLtoCost
 from strikes import  getNiftyStopLoss,getBNStopLoss,getExpirySL,getNiftyExpiryTradesSL
-from Common import isExpiryDay,writeToTheFileWithContent,readContentsofFile,isPreExpiryDay
+from Common import isExpiryDay,writeToTheFileWithContent,readContentsofFile,isPreExpiryDay,isNiftyExpiryTrade
 import os 
 
 preClosingSLModified = False 
@@ -122,14 +122,21 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,fullPremium=False,
         if SLCorrection == True:
             sendNotifications(f'call prem is {callCombinedPrice} put prem is {putCombinedPrice}')
             if callCombinedPrice > putCombinedPrice:
+                if (isNiftyExpiryTrade() == False):
+                    callSL = ( 25 / callCombinedPrice)
+                    putSL =  ( 25 / putCombinedPrice)
                 sendNotifications("call prem is higher")
-                putRisk = putCombinedPrice * stoploss
+                putRisk = putCombinedPrice * callSL
                 callSL = round((putRisk/callCombinedPrice),2)
                 sendNotifications(f"computed callSL {callSL}")
 
             elif callCombinedPrice < putCombinedPrice:
                 sendNotifications("put prem is higher")
-                callRisk = callCombinedPrice * stoploss
+
+                if (isNiftyExpiryTrade() == False):
+                    callSL = ( 25 / callCombinedPrice)
+                    putSL =  ( 25 / putCombinedPrice)
+                callRisk = callCombinedPrice * putSL
                 putSL = round((callRisk/putCombinedPrice),2)
                 sendNotifications(f"computed putSL {putSL}")
                 

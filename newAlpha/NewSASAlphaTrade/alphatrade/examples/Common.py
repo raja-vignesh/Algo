@@ -74,6 +74,20 @@ def isBNBuyingDay():
        return True
    else:
        return False
+   
+def isBNExpiryTrade():
+   day = datetime.date.today().weekday()
+   if day == 1 or day == 2:
+       return True
+   else:
+       return False
+   
+def isNiftyExpiryTrade():
+   day = datetime.date.today().weekday()
+   if day == 2 or day == 3:
+       return True
+   else:
+       return False
     
 def isExpiryTrades():
    day = datetime.date.today().weekday()

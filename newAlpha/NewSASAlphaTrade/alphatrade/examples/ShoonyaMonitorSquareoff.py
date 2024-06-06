@@ -85,7 +85,7 @@ def cancelPendingOrders():
     connection = getConnectionObject()
     orders = connection.get_order_book()
     for order in orders:
-        if order['status'].lower() == 'trigger_pending' or order['status'].lower() == 'pending':
+        if order['status'].lower() == 'trigger_pending' or order['status'].lower() == 'pending' or order['status'].lower() == 'open':
             connection.cancel_order(orderno=order['norenordno'])
             sendNotifications('Pendin orders cancelled ' + str(datetime.datetime.now()))
     
