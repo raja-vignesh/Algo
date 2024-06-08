@@ -124,10 +124,9 @@ def open_socket():
             unsubscribeToPrices(sas,orders)
             # NOTE This is just an example to stop script without using `control + c` Keyboard Interrupt
             # It checks whether the stop.txt has word stop
-            # This check is done every 30 seconds
-
+            # This check is done every 30 seconds        
             sendNotifications('percent Starddle orders placed and the activity completed')
- 
+            exit(0)
             
 def setRefenceValues():
     global lowerReference
