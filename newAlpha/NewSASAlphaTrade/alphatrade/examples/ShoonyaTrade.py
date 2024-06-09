@@ -122,6 +122,8 @@ def placeStraddleStopOders(sas,orders,stoploss,stratergy=None,SLCorrection=False
 
                 sendNotifications(f"normalized(0.15) callSL {callSL}")
                 sendNotifications(f"normalized(0.15) putSL {putSL}")
+            sendNotifications(f'{stratergy} call risk {callSL * callCombinedPrice} is {callSL * callCombinedPrice * order.quantity}')    
+            sendNotifications(f'{stratergy} put risk {putSL * putCombinedPrice} is {putSL * putCombinedPrice * order.quantity}')
             if stratergy == 'AVBNExpiryTripplestraddles':
                 BNCallSL = callSL 
                 BNPutSL = putSL
