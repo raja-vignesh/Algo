@@ -57,7 +57,7 @@ soldOrderIds = []
 BNLTP = 0.0
 tradeActive = False
 
-lotSize = 25
+lotSize = 15
 benchmarkDifference = bankNiftyAcceptedDifference()
 atmPremiumDifference = 100
 

@@ -43,7 +43,7 @@ orders = []
 quantity = 1
 vix = 0
 vixInstrument = None
-lotSize = 25
+lotSize = 15
 
 ## Added for ATM from OC##
 instruments = []
