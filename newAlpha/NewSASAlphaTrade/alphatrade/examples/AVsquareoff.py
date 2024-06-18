@@ -45,6 +45,8 @@ def squareOff():
         if offid is not None:
             sendNotifications(f'Squared off with id {offid}')
     cancelPendingOrders()
+    sleep(180)
+    positions = getDaywisePositions(sas)
     calculateMTM(positions)
     
 def sqaureOffPosition(position):
@@ -104,7 +106,6 @@ def calculateMTM(positions):
         sendNotifications('shoonya_sqoff file deleted')
     else:
         sendNotifications("shoonya_sqoff does not exist")
-    sleep(300)
     write_pl_to_csv(round(mtm),'Bank')    
 
 
