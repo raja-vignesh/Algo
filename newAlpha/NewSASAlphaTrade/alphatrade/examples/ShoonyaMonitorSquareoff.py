@@ -13,7 +13,7 @@ from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
 from strikes import getNiftyMaxLoss,getNiftyMaxProfit
 from SendNotifications import sendNotifications
 from SAS import createSession,reConnectSession
-from Common import isExpiryTrades,isExpiryDay,isPreExpiryDay,writeToTheFileWithContent
+from Common import isBNExpiryTrade,isExpiryDay,isPreExpiryDay,writeToTheFileWithContent
 import os
 import sys
 from ShoonyaSession import createShoonyaSession,getConnectionObject 
@@ -35,6 +35,15 @@ def main():
         if shoonya == None:
              sleep(90)
              pass
+    if  (isBNExpiryTrade() == True):
+        while datetime.datetime.now().time() <= time(12,3):
+            sleep(300)
+            pass
+    else:
+        while datetime.datetime.now().time() <= time(11,33):
+            sleep(300)
+            pass
+    sendNotifications('Shoonya SquareOff monitoring started ' + str(datetime.datetime.now()))
     calculateMTM()      
     
     
@@ -137,6 +146,5 @@ def calculateMTM():
     
     
 if(__name__ == '__main__'):
-    sendNotifications('Shoonya SquareOff monitoring started ' + str(datetime.datetime.now()))
     #while True:
     main()

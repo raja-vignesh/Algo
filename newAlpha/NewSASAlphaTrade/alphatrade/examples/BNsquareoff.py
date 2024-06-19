@@ -14,7 +14,7 @@ from alphatrade import LiveFeedType,TransactionType,OrderType,ProductType
 
 from SendNotifications import sendNotifications
 from SAS import createSession,reConnectSession
-from Common import isExpiryDay,isPreExpiryDay,isExpiryTrades,writeToTheFileWithContent
+from Common import isExpiryDay,isPreExpiryDay,isNiftyExpiryTrade,writeToTheFileWithContent
 import re
 import os
 import sys
@@ -34,6 +34,15 @@ def main():
         if sas == None:
             sleep(10)
             pass
+    if  (isNiftyExpiryTrade() == True):
+        while datetime.datetime.now().time() <= time(12,3):
+            sleep(300)
+            pass
+    else:
+        while datetime.datetime.now().time() <= time(11,33):
+            sleep(300)
+            pass
+    sendNotifications('JA186 SquareOff monitoring started ' + str(datetime.datetime.now()))
     calculateMTM()
     
 
@@ -166,6 +175,5 @@ def calculateMTM():
     sendNotifications(f'mtm of JA186 is {finalMTM}')
 
 if(__name__ == '__main__'):
-    sendNotifications('JA186 SquareOff monitoring started ' + str(datetime.datetime.now()))
     #while True:
     main()
