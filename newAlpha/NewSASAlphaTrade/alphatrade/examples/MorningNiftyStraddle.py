@@ -102,7 +102,11 @@ def open_socket():
        sleep(30)
        pass
     
-    
+    if os.path.exists("nifty_sqoff.txt"):
+        os.remove("nifty_sqoff.txt")
+        sendNotifications('nifty_sqoff file deleted')
+    else:
+        sendNotifications("nifty_sqoff does not exist")
     
     sendNotifications("Script Start Time :: " + str(datetime.datetime.now()))
     
@@ -142,12 +146,7 @@ def open_socket():
                     niftyLTP = (NiftySpot + NiftyFut)/2.0
                     
            
-            if not os.path.exists('vix.txt'):
-                with open('vix.txt', 'w') as textFile:
-                    textFile.write(str(vix))
-            elif os.path.exists('vix.txt'):
-                with open('vix.txt', 'w') as textFile:
-                   textFile.write(str(vix))
+            
 
             if not os.path.exists('NiftyLTP.txt'):
                      with open('NiftyLTP.txt', 'w') as textFile:

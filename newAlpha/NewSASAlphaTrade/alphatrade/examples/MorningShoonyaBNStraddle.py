@@ -70,6 +70,11 @@ def main():
         if shoonya == None:
              sleep(90)
              pass
+    if os.path.exists("shoonya_sqoff.txt"):
+        os.remove("shoonya_sqoff.txt")
+        sendNotifications('shoonya_sqoff file deleted')
+    else:
+        sendNotifications("shoonya_sqoff does not exist")
     if socket_opened == False:
         open_socket()
 
