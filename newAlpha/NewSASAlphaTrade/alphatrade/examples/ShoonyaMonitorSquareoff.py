@@ -126,7 +126,7 @@ def calculateMTM():
                     mtm =  mtm + float(position['rpnl']) 
                 elif (netQuantity != 0) and (position['s_prdt_ali'] == 'MIS'):
                    mtm =  mtm + float(position['urmtom'])     
-            #sendNotifications(f'P/L is {mtm}')
+            sendNotifications(f'Bank P/L is {mtm}')
             
             
             pass 

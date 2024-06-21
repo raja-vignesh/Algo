@@ -149,7 +149,7 @@ def calculateMTM():
                         elif position['symbol'] == 'NIFTY':
                             quantity = abs(position["net_quantity"]) / 25
                         mtm = mtm + (((position['average_sell_price'] - position['ltp']) * abs(position["net_quantity"])) + position['realized_mtm'])
-            #sendNotifications(f'mtm is {mtm}')
+            sendNotifications(f'mtm of Bank is {mtm}')
             pass 
 
     except Exception as e:
@@ -161,6 +161,7 @@ def calculateMTM():
         calculateMTM()
     
     finalMTM = float(mtm)
+    sendNotifications('while broken')
     # if  finalMTM >= MAX_PROFIT:
     #     sendNotifications(f'profit {MAX_PROFIT} squareoff')
     #     squareOff()
@@ -171,6 +172,7 @@ def calculateMTM():
     #     sendNotifications('Exiting squareoff')
     #     sys.exit()
     if (datetime.datetime.now().time() <= time(15,15)):
+        sendNotifications('Bank sqoff triggered')
         squareOff()
     sendNotifications(f'mtm of JA186 is {finalMTM}')
 
