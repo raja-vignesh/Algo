@@ -24,7 +24,7 @@ def createShoonyaToken():
 
             # Credentials
             user = 'N0386'
-            pwd = 'Trans4321$'
+            pwd = 'Trade0987$'
             vc = 'N0386_U'
             app_key = 'be7f0599799d161f512a0ba22ef0e1f0'
             imei = 'abc1234'
