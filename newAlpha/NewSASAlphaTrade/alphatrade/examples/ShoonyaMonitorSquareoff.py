@@ -142,7 +142,7 @@ def calculateMTM():
     finalMTM = float(mtm)
     if (datetime.datetime.now().time() <= time(15,15)):
         squareOff()
-    sendNotifications(f'mtm of Nifty is {finalMTM}')
+    sendNotifications(f'mtm of Bank is {finalMTM}')
     
     
 if(__name__ == '__main__'):
