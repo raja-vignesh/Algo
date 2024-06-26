@@ -125,7 +125,10 @@ def calculateMTM():
                 if (netQuantity == 0) and (position['s_prdt_ali'] == 'MIS'):
                     mtm =  mtm + float(position['rpnl']) 
                 elif (netQuantity != 0) and (position['s_prdt_ali'] == 'MIS'):
-                   mtm =  mtm + float(position['urmtom'])     
+                   if (position["daybuyqty"] == 0):
+                        mtm =  mtm + float(position['urmtom'])
+                   elif (position["daybuyqty"] != 0): 
+                        mtm =  mtm + (float(position['urmtom']) + float(position['rpnl']))  
             sendNotifications(f'Bank P/L is {mtm}')
             
             
