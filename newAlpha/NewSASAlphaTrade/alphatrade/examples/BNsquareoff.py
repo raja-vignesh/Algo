@@ -172,7 +172,7 @@ def calculateMTM():
     #     sendNotifications('Exiting squareoff')
     #     sys.exit()
     if (datetime.datetime.now().time() <= time(15,15)):
-        sendNotifications('Bank sqoff triggered')
+        sendNotifications('nifty sqoff triggered')
         squareOff()
     sendNotifications(f'mtm of JA186 is {finalMTM}')
 

@@ -91,7 +91,7 @@ def calculateMTM():
             mtm = mtm + float(position['realized_mtm'])  
         elif (position["net_quantity"] != 0) and (position['product'] == 'MIS'):
             openPositions = openPositions + 1
-    sendNotifications(f'P/L for the day is {mtm}')
+    sendNotifications(f'Nifty P/L for the day is {mtm}')
     if openPositions > 0:
         sendNotifications(f'Warning! {openPositions} still open')
 
