@@ -25,7 +25,11 @@ def getBankNiftyCPRDifference():
     return 6
 
 def getBankNiftyFutureScrip():
-    return {'exchangeCode': 2, 'instrumentToken': 35165}
+    day = datetime.date.today().weekday()
+    if (day <= 2):
+        return {'exchangeCode': 2, 'instrumentToken': 35165}
+    else:
+        return {'exchangeCode': 2, 'instrumentToken': 35089}
 
 def getBankNiftySpotScrip():
     return {'exchangeCode': 1, 'instrumentToken': 26009}
